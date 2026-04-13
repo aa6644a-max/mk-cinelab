@@ -41,15 +41,18 @@ export function useAuth() {
 
   const signOut = async () => {
   try {
-    // 모든 탭에서 로그아웃
     await supabase.auth.signOut({ scope: "global" });
   } catch (err) {
     console.error("로그아웃 오류:", err);
   } finally {
-    // 로컬 스토리지 강제 클리어
+    // 쿠키 전체 삭제
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
     localStorage.clear();
     sessionStorage.clear();
-    // 완전 새로고침
     window.location.replace("/");
   }
 };
