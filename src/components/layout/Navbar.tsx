@@ -43,14 +43,9 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "text-sm transition-colors whitespace-nowrap",
-                pathname === item.href
-                  ? "text-white font-medium"
-                  : "text-gray-400 hover:text-gray-200"
+            <Link key={item.href} href={item.href}
+              className={cn("text-sm transition-colors whitespace-nowrap",
+                pathname === item.href ? "text-white font-medium" : "text-gray-400 hover:text-gray-200"
               )}
             >
               {item.label}
@@ -58,7 +53,6 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* 데스크탑 우측 */}
         <div className="hidden md:flex items-center gap-3">
           <SearchBar />
           {user ? (
@@ -87,37 +81,29 @@ export default function Navbar() {
                     <p className="text-sm text-white font-medium truncate">{user.user_metadata?.name ?? user.email}</p>
                     <p className="text-xs text-gray-600 truncate">{user.email}</p>
                   </div>
-                  <Link
-                    href="/mypage"
-                    onClick={() => setUserMenuOpen(false)}
+                  <Link href="/mypage" onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-300 hover:bg-gray-800 transition-colors"
                   >
-                    <User className="w-4 h-4" />
-                    마이페이지
+                    <User className="w-4 h-4" />마이페이지
                   </Link>
                   <div className="border-t border-gray-800">
-                    {/* 로그아웃 — 서버 라우트로 처리 */}
-                    
-                      href="/auth/signout"
-                      className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 transition-colors"
+                    <Link href="/auth/signout"
+                      className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 transition-colors"
                     >
-                      <LogOut className="w-4 h-4" />
-                      로그아웃
-                    </a>
+                      <LogOut className="w-4 h-4" />로그아웃
+                    </Link>
                     <button
                       onClick={() => { setUserMenuOpen(false); signInWithGoogle(); }}
                       className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-gray-400 hover:bg-gray-800 transition-colors"
                     >
-                      <User className="w-4 h-4" />
-                      다른 계정으로 로그인
+                      <User className="w-4 h-4" />다른 계정으로 로그인
                     </button>
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <button
-              onClick={signInWithGoogle}
+            <button onClick={signInWithGoogle}
               className="text-sm border border-gray-700 px-4 py-1.5 rounded-lg text-gray-300 hover:border-gray-500 transition-colors whitespace-nowrap"
             >
               Google 로그인
@@ -125,32 +111,21 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* 모바일 우측 */}
         <div className="flex md:hidden items-center gap-3">
           <SearchBar />
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
+          <button onClick={() => setMenuOpen(!menuOpen)} className="text-gray-400 hover:text-white transition-colors">
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {/* 모바일 드롭다운 */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-800 bg-black/95">
           <div className="px-4 py-3 space-y-1">
             {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMenuOpen(false)}
-                className={cn(
-                  "block px-3 py-2.5 rounded-lg text-sm transition-colors",
-                  pathname === item.href
-                    ? "bg-gray-900 text-white font-medium"
-                    : "text-gray-400 hover:bg-gray-900 hover:text-white"
+              <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
+                className={cn("block px-3 py-2.5 rounded-lg text-sm transition-colors",
+                  pathname === item.href ? "bg-gray-900 text-white font-medium" : "text-gray-400 hover:bg-gray-900 hover:text-white"
                 )}
               >
                 {item.label}
@@ -174,20 +149,16 @@ export default function Navbar() {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                 </div>
-                {/* 로그아웃 — 서버 라우트로 처리 */}
-                
-                  href="/auth/signout"
-                  className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-gray-900 hover:text-red-400 transition-colors"
+                <Link href="/auth/signout"
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-gray-900 hover:text-red-400 transition-colors"
                 >
-                  <LogOut className="w-4 h-4" />
-                  로그아웃
-                </a>
+                  <LogOut className="w-4 h-4" />로그아웃
+                </Link>
                 <button
                   onClick={() => { setMenuOpen(false); signInWithGoogle(); }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-gray-900 transition-colors"
                 >
-                  <User className="w-4 h-4" />
-                  다른 계정으로 로그인
+                  <User className="w-4 h-4" />다른 계정으로 로그인
                 </button>
               </div>
             ) : (
