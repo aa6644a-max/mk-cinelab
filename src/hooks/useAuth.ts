@@ -13,16 +13,21 @@ export function useAuth() {
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      if (event === "SIGNED_IN" && session?.user?.email) {
-        try {
-          await supabase.rpc("claim_guest_reviews", {
-            p_user_id: session.user.id,
-            p_email: session.user.email,
-          });
-        } catch {}
-      }
-    });
+  setUser(session?.user ?? null);
+
+  if (event === "SIGNED_OUT") {
+    setUser(null);
+  }
+
+  if (event === "SIGNED_IN" && session?.user?.email) {
+    try {
+      await supabase.rpc("claim_guest_reviews", {
+        p_user_id: session.user.id,
+        p_email: session.user.email,
+      });
+    } catch {}
+  }
+});
 
     return () => listener.subscription.unsubscribe();
   }, []);
