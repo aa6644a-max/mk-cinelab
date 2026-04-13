@@ -12,11 +12,14 @@ export function useAuth() {
       setUser(data.session?.user ?? null);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // onAuthStateChange 안에 추가
+const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
   setUser(session?.user ?? null);
 
   if (event === "SIGNED_OUT") {
     setUser(null);
+    // 강제 새로고침으로 모든 클라이언트 캐시 초기화
+    window.location.reload();
   }
 
   if (event === "SIGNED_IN" && session?.user?.email) {
