@@ -82,14 +82,14 @@ export default function SearchBar() {
   };
 
   return (
-    <div ref={containerRef} className="relative" style={{ isolation: "isolate" }}>
+    <div ref={containerRef} className="relative">
       {/* 검색창 */}
       <div className={cn(
-  "flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all",
-  isFocused
-    ? "border-gray-500 bg-gray-900 w-56"
-    : "border-gray-800 bg-gray-900/50 w-36"
-)} style={{ maxWidth: isFocused ? "224px" : "144px" }}>
+        "flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all",
+        isFocused
+          ? "border-gray-500 bg-gray-900 w-56"
+          : "border-gray-800 bg-gray-900/50 w-40"
+      )}>
         {isLoading ? (
           <div className="w-3.5 h-3.5 border border-gray-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
         ) : (
