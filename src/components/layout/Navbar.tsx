@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
 import SearchBar from "@/components/layout/SearchBar";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 
 const navItems = [
   { label: "대시보드", href: "/" },
@@ -19,7 +19,7 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, loading, signInWithGoogle, signOut } = useAuth();
+  const { user, signInWithGoogle, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -29,6 +29,7 @@ export default function Navbar() {
           MK <span className="text-red-500">CINELAB</span>
         </Link>
 
+        {/* 데스크탑 메뉴 */}
         <div className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
             <Link
@@ -52,19 +53,33 @@ export default function Navbar() {
           {user ? (
             <div className="flex items-center gap-3">
               {user.user_metadata?.avatar_url ? (
-                <Image src={user.user_metadata.avatar_url} alt="프로필" width={28} height={28} className="rounded-full" />
+                <Image
+                  src={user.user_metadata.avatar_url}
+                  alt="프로필"
+                  width={28}
+                  height={28}
+                  className="rounded-full"
+                />
               ) : (
                 <div className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center text-xs font-bold text-white">
                   {(user.user_metadata?.name ?? user.email ?? "U")[0].toUpperCase()}
                 </div>
               )}
-              <span className="text-sm text-gray-300">{user.user_metadata?.name ?? user.email}</span>
-              <button onClick={signOut} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+              <span className="text-sm text-gray-300 hidden lg:block">
+                {user.user_metadata?.name ?? user.email}
+              </span>
+              {/* 로그아웃 버튼 — z-index 높여서 다른 요소에 안 가리도록 */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  signOut();
+                }}
+                className="relative z-50 flex items-center gap-1 text-xs text-gray-500 hover:text-red-400 transition-colors px-2 py-1 rounded"
+              >
+                <LogOut className="w-3.5 h-3.5" />
                 로그아웃
               </button>
             </div>
-          ) : loading ? (
-            <div className="w-20 h-8 bg-gray-800 rounded-lg animate-pulse" />
           ) : (
             <button
               onClick={signInWithGoogle}
@@ -114,20 +129,34 @@ export default function Navbar() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {user.user_metadata?.avatar_url ? (
-                    <Image src={user.user_metadata.avatar_url} alt="프로필" width={28} height={28} className="rounded-full" />
+                    <Image
+                      src={user.user_metadata.avatar_url}
+                      alt="프로필"
+                      width={28}
+                      height={28}
+                      className="rounded-full"
+                    />
                   ) : (
                     <div className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center text-xs font-bold text-white">
                       {(user.user_metadata?.name ?? user.email ?? "U")[0].toUpperCase()}
                     </div>
                   )}
-                  <span className="text-sm text-gray-300">{user.user_metadata?.name ?? user.email}</span>
+                  <span className="text-sm text-gray-300">
+                    {user.user_metadata?.name ?? user.email}
+                  </span>
                 </div>
-                <button onClick={signOut} className="text-xs text-gray-500 hover:text-gray-300">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMenuOpen(false);
+                    signOut();
+                  }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-400 transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
                   로그아웃
                 </button>
               </div>
-            ) : loading ? (
-              <div className="h-9 bg-gray-800 rounded-lg animate-pulse" />
             ) : (
               <button
                 onClick={() => { signInWithGoogle(); setMenuOpen(false); }}
