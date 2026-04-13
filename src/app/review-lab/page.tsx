@@ -201,8 +201,8 @@ export default function ReviewLabPage() {
           content: review,
           matchScore,
           guestNickname: guestName,
-          guestEmail: guestEmail,
-        }),
+          userId: user?.id ?? null, // 추가
+}),
       });
       const data = await res.json();
       if (data.success) {

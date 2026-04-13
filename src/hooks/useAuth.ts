@@ -1,69 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
+    // 초기 세션 확인
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
+      setInitialized(true);
     });
 
-    // onAuthStateChange 안에 추가
-const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
-  setUser(session?.user ?? null);
+    // 상태 변화 구독
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
 
-  if (event === "SIGNED_OUT") {
-    setUser(null);
-    // 강제 새로고침으로 모든 클라이언트 캐시 초기화
-    window.location.reload();
-  }
-
-  if (event === "SIGNED_IN" && session?.user?.email) {
-    try {
-      await supabase.rpc("claim_guest_reviews", {
-        p_user_id: session.user.id,
-        p_email: session.user.email,
-      });
-    } catch {}
-  }
-});
+      if (event === "SIGNED_IN" && session?.user?.email) {
+        supabase.rpc("claim_guest_reviews", {
+          p_user_id: session.user.id,
+          p_email: session.user.email,
+        }).catch(() => {});
+      }
+    });
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: window.location.origin + "/auth/callback",
-      queryParams: {
-        prompt: "select_account", // 항상 계정 선택 화면 표시
+  const signInWithGoogle = useCallback(async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/auth/callback",
+        queryParams: { prompt: "select_account" },
       },
-    },
-  });
-};
-
-  const signOut = async () => {
-  try {
-    await supabase.auth.signOut({ scope: "global" });
-  } catch (err) {
-    console.error("로그아웃 오류:", err);
-  } finally {
-    // 쿠키 전체 삭제
-    document.cookie.split(";").forEach((c) => {
-      document.cookie = c
-        .replace(/^ +/, "")
-        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.replace("/");
-  }
-};
+  }, []);
 
-  return { user, loading: false, signInWithGoogle, signOut };
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    window.location.href = "/";
+  }, []);
+
+  return { user, initialized, loading: !initialized, signInWithGoogle, signOut };
 }

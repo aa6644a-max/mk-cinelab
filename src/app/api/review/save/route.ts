@@ -4,22 +4,20 @@ import { searchMovieTMDB } from "@/lib/api";
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createServerSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
-
     const body = await req.json();
     const {
       movieTitle, moviePoster, userInput,
       inputKeywords, style, content, matchScore,
       guestNickname, guestEmail,
+      userId, // 클라이언트에서 user.id 전달
     } = body;
 
-    // 비로그인 시 닉네임 필수
-    if (!user && !guestNickname?.trim()) {
+    if (!userId && !guestNickname?.trim()) {
       return NextResponse.json({ error: "닉네임을 입력해주세요" }, { status: 400 });
     }
 
-    // TMDB 포스터 + ID
+    const supabase = await createServerSupabase();
+
     let finalPoster = moviePoster;
     let tmdbId = null;
 
@@ -46,8 +44,8 @@ export async function POST(req: NextRequest) {
       is_user_edited: false,
     };
 
-    if (user) {
-      insertData.user_id = user.id;
+    if (userId) {
+      insertData.user_id = userId;
     } else {
       insertData.user_id = null;
       insertData.guest_nickname = guestNickname.trim();
@@ -65,9 +63,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    if (user) {
+    if (userId) {
       try {
-        await supabase.rpc("increment_review_count", { user_id: user.id });
+        await supabase.rpc("increment_review_count", { user_id: userId });
       } catch {}
     }
 
