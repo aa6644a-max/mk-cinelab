@@ -9,32 +9,33 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 현재 세션 확인
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
-      setLoading(false);
+      setLoading(false); // ← 반드시 false로
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
+      setUser(session?.user ?? null);
+      setLoading(false); // ← 여기도
 
-      // 로그인 시 guest 리뷰 자동 연결
-      if (event === "SIGNED_IN" && currentUser?.email) {
+      if (event === "SIGNED_IN" && session?.user?.email) {
         try {
-          const result = await supabase.rpc("claim_guest_reviews", {
-            p_user_id: currentUser.id,
-            p_email: currentUser.email,
+          await supabase.rpc("claim_guest_reviews", {
+            p_user_id: session.user.id,
+            p_email: session.user.email,
           });
-          if ((result.data ?? 0) > 0) {
-            console.log("[auth] guest 리뷰 연결:", result.data + "개");
-          }
-        } catch (err) {
-          console.error("[auth] guest 리뷰 연결 실패:", err);
-        }
+        } catch {}
       }
     });
 
-    return () => listener.subscription.unsubscribe();
+    // 3초 후 강제로 loading 해제 (안전장치)
+    const timeout = setTimeout(() => setLoading(false), 3000);
+
+    return () => {
+      listener.subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const signInWithGoogle = async () => {
@@ -47,9 +48,9 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-  await supabase.auth.signOut();
-  window.location.href = "/";
-};
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   return { user, loading, signInWithGoogle, signOut };
 }
