@@ -1,0 +1,150 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowLeft, ShieldCheck, Sparkles, PenLine, Clock, Film } from "lucide-react";
+
+const STYLE_LABELS: Record<string, string> = {
+  critic: "평론가 모드",
+  emotional: "감성 모드",
+  blog: "블로그 모드",
+  sns: "SNS 모드",
+};
+
+function getTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const min = Math.floor(diff / 60000);
+  const hour = Math.floor(min / 60);
+  const day = Math.floor(hour / 24);
+  if (day > 0) return day + "일 전";
+  if (hour > 0) return hour + "시간 전";
+  if (min > 0) return min + "분 전";
+  return "방금 전";
+}
+
+export default function ReviewDetailClient({ review }: { review: any }) {
+  const profile = review.profiles;
+  const detailHref = review.tmdb_id ? "/movie/tmdb-" + review.tmdb_id : null;
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      {/* 뒤로가기 */}
+      <Link
+        href="/board"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors mb-6"
+      >
+        <ArrowLeft className="w-4 h-4" /> 리뷰 보드로
+      </Link>
+
+      {/* 영화 정보 헤더 */}
+      <div className="flex gap-4 p-5 bg-gray-900/60 border border-gray-800 rounded-2xl mb-6">
+        {review.movie_poster ? (
+          <Image
+            src={review.movie_poster}
+            alt={review.movie_title}
+            width={80}
+            height={120}
+            className="rounded-xl object-cover flex-shrink-0"
+          />
+        ) : (
+          <div className="w-20 h-[120px] bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Film className="w-6 h-6 text-gray-600" />
+          </div>
+        )}
+        <div className="flex-1">
+          <p className="text-xs text-red-500 font-semibold tracking-widest mb-1 uppercase">영화</p>
+          <h1 className="text-xl font-black text-white mb-3">{review.movie_title}</h1>
+          {detailHref && (
+            <Link href={detailHref}>
+              <button className="text-xs text-gray-400 border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500 hover:text-white transition-colors">
+                영화 상세 보기 →
+              </button>
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* 작성자 정보 */}
+      <div className="flex items-center gap-3 mb-4">
+        {profile?.avatar_url ? (
+          <Image src={profile.avatar_url} alt={profile.nickname} width={36} height={36} className="rounded-full" />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-gray-700 flex items-center justify-center text-sm text-gray-400">
+            {(profile?.nickname ?? "?")[0]}
+          </div>
+        )}
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-white">
+  {profile?.nickname ?? review.guest_nickname ?? "익명"}
+</span>
+            {profile?.is_trusted && (
+              <span className="flex items-center gap-0.5 text-[9px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
+                <ShieldCheck className="w-2 h-2" /> 신뢰 마크
+              </span>
+            )}
+            {review.is_ai_assisted && (
+              <span className="flex items-center gap-0.5 text-[9px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
+                <Sparkles className="w-2 h-2" /> AI Assisted
+              </span>
+            )}
+            {review.is_user_edited && (
+              <span className="flex items-center gap-0.5 text-[9px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
+                <PenLine className="w-2 h-2" /> 사용자 검수
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-[10px] text-gray-600 mt-0.5">
+            <Clock className="w-2.5 h-2.5" />
+            {getTimeAgo(review.created_at)}
+            <span className="mx-1">·</span>
+            {STYLE_LABELS[review.style] ?? review.style}
+          </div>
+        </div>
+      </div>
+
+      {/* 감상 반영도 */}
+      <div className="space-y-1.5 mb-6">
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-gray-500">감상 반영도</span>
+          <span className="text-xs font-bold text-red-400">{review.match_score}%</span>
+        </div>
+        <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-red-700 to-red-400 rounded-full"
+            style={{ width: review.match_score + "%" }}
+          />
+        </div>
+      </div>
+
+      {/* 입력 키워드 */}
+      {review.input_keywords?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-6">
+          <span className="text-xs text-gray-600 self-center">감정 키워드:</span>
+          {review.input_keywords.map((kw: string) => (
+            <span key={kw} className="text-xs border border-red-900 text-red-400 px-2 py-0.5 rounded-full">
+              {kw}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* 리뷰 본문 */}
+      <div className="bg-gray-900/80 border border-gray-700 rounded-2xl p-6 mb-6">
+        <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">
+          {review.content}
+        </p>
+      </div>
+
+      {/* 원본 감상 */}
+      {review.user_input && (
+        <div className="border border-gray-800 rounded-xl p-4">
+          <p className="text-xs text-gray-600 mb-2">작성자의 원본 감상</p>
+          <p className="text-xs text-gray-500 leading-relaxed italic">
+            "{review.user_input}"
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
