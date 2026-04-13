@@ -19,12 +19,11 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, signInWithGoogle, signOut } = useAuth();
+  const { user, signInWithGoogle } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // 외부 클릭 시 유저 메뉴 닫기
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
@@ -42,7 +41,6 @@ export default function Navbar() {
           MK <span className="text-red-500">CINELAB</span>
         </Link>
 
-        {/* 데스크탑 메뉴 */}
         <div className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
             <Link
@@ -63,22 +61,14 @@ export default function Navbar() {
         {/* 데스크탑 우측 */}
         <div className="hidden md:flex items-center gap-3">
           <SearchBar />
-
           {user ? (
-            /* 로그인 상태 — 드롭다운 박스 */
             <div ref={userMenuRef} className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-700 hover:border-gray-500 transition-colors"
               >
                 {user.user_metadata?.avatar_url ? (
-                  <Image
-                    src={user.user_metadata.avatar_url}
-                    alt="프로필"
-                    width={22}
-                    height={22}
-                    className="rounded-full"
-                  />
+                  <Image src={user.user_metadata.avatar_url} alt="프로필" width={22} height={22} className="rounded-full" />
                 ) : (
                   <div className="w-5 h-5 rounded-full bg-red-600 flex items-center justify-center text-[10px] font-bold text-white">
                     {(user.user_metadata?.name ?? user.email ?? "U")[0].toUpperCase()}
@@ -90,19 +80,13 @@ export default function Navbar() {
                 <ChevronDown className={cn("w-3.5 h-3.5 text-gray-500 transition-transform", userMenuOpen && "rotate-180")} />
               </button>
 
-              {/* 드롭다운 */}
               {userMenuOpen && (
                 <div className="absolute top-full right-0 mt-2 w-52 bg-gray-900 border border-gray-700 rounded-xl overflow-hidden shadow-2xl z-50">
-                  {/* 유저 정보 */}
                   <div className="px-4 py-3 border-b border-gray-800">
                     <p className="text-xs text-gray-500 mb-0.5">로그인 중</p>
-                    <p className="text-sm text-white font-medium truncate">
-                      {user.user_metadata?.name ?? user.email}
-                    </p>
+                    <p className="text-sm text-white font-medium truncate">{user.user_metadata?.name ?? user.email}</p>
                     <p className="text-xs text-gray-600 truncate">{user.email}</p>
                   </div>
-
-                  {/* 메뉴 항목 */}
                   <Link
                     href="/mypage"
                     onClick={() => setUserMenuOpen(false)}
@@ -111,15 +95,15 @@ export default function Navbar() {
                     <User className="w-4 h-4" />
                     마이페이지
                   </Link>
-
                   <div className="border-t border-gray-800">
-                    <button
-                      onClick={() => { setUserMenuOpen(false); signOut(); }}
+                    {/* 로그아웃 — 서버 라우트로 처리 */}
+                    
+                      href="/auth/signout"
                       className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-gray-400 hover:bg-gray-800 hover:text-red-400 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
                       로그아웃
-                    </button>
+                    </a>
                     <button
                       onClick={() => { setUserMenuOpen(false); signInWithGoogle(); }}
                       className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-gray-400 hover:bg-gray-800 transition-colors"
@@ -132,7 +116,6 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            /* 비로그인 상태 */
             <button
               onClick={signInWithGoogle}
               className="text-sm border border-gray-700 px-4 py-1.5 rounded-lg text-gray-300 hover:border-gray-500 transition-colors whitespace-nowrap"
@@ -175,11 +158,9 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* 모바일 유저 영역 */}
           <div className="px-4 pb-4 border-t border-gray-800 pt-3">
             {user ? (
               <div className="space-y-2">
-                {/* 유저 정보 */}
                 <div className="flex items-center gap-2 px-3 py-2 bg-gray-900 rounded-lg">
                   {user.user_metadata?.avatar_url ? (
                     <Image src={user.user_metadata.avatar_url} alt="프로필" width={28} height={28} className="rounded-full" />
@@ -193,14 +174,14 @@ export default function Navbar() {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                 </div>
-                {/* 버튼들 */}
-                <button
-                  onClick={() => { setMenuOpen(false); signOut(); }}
+                {/* 로그아웃 — 서버 라우트로 처리 */}
+                
+                  href="/auth/signout"
                   className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-gray-900 hover:text-red-400 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   로그아웃
-                </button>
+                </a>
                 <button
                   onClick={() => { setMenuOpen(false); signInWithGoogle(); }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-gray-900 transition-colors"
