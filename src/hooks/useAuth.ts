@@ -28,24 +28,31 @@ export function useAuth() {
   }, []);
 
   const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin + "/auth/callback",
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: window.location.origin + "/auth/callback",
+      queryParams: {
+        prompt: "select_account", // 항상 계정 선택 화면 표시
       },
-    });
-  };
+    },
+  });
+};
 
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (err) {
-      console.error("로그아웃 오류:", err);
-    } finally {
-      setUser(null);
-      window.location.href = "/";
-    }
-  };
+  try {
+    // 모든 탭에서 로그아웃
+    await supabase.auth.signOut({ scope: "global" });
+  } catch (err) {
+    console.error("로그아웃 오류:", err);
+  } finally {
+    // 로컬 스토리지 강제 클리어
+    localStorage.clear();
+    sessionStorage.clear();
+    // 완전 새로고침
+    window.location.replace("/");
+  }
+};
 
   return { user, loading: false, signInWithGoogle, signOut };
 }
