@@ -3,6 +3,7 @@ import { getBoxOffice, searchMovieTMDB } from "@/lib/api";
 import BoxOfficeSection from "@/components/dashboard/BoxOfficeSection";
 import CurationBanner from "@/components/dashboard/CurationBanner";
 import LatestReviews from "@/components/dashboard/LatestReviews";
+import SignoutHandler from "@/components/layout/SignoutHandler";
 import { BoxOfficeMovie } from "@/types";
 
 export const revalidate = 3600;
@@ -40,28 +41,26 @@ async function getBoxOfficeWithPosters(): Promise<BoxOfficeMovie[]> {
   return movies;
 }
 
-// ✅ 데이터 페칭 + 렌더링 분리
 async function DashboardContent() {
   const boxOffice = await getBoxOfficeWithPosters();
   return <BoxOfficeSection movies={boxOffice} />;
 }
 
-// ✅ default export는 반드시 동기 함수처럼 보이게
 export default function HomePage() {
   return (
     <div className="space-y-12">
+      <Suspense fallback={null}>
+        <SignoutHandler />
+      </Suspense>
       <Suspense fallback={<BoxOfficeSkeleton />}>
         <DashboardContent />
       </Suspense>
       <CurationBanner />
-      <Suspense fallback={<div className="h-40 bg-gray-900 rounded-xl animate-pulse" />}>
-  <LatestReviews />
-</Suspense>
+      <LatestReviews />
     </div>
   );
 }
 
-// 로딩 중 보여줄 스켈레톤
 function BoxOfficeSkeleton() {
   return (
     <section>

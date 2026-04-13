@@ -6,13 +6,8 @@ export async function GET(req: Request) {
   await supabase.auth.signOut();
   const url = new URL(req.url);
 
-  const response = NextResponse.redirect(new URL("/", url.origin));
-  
-  // Supabase 쿠키 강제 삭제
-  response.cookies.delete("sb-access-token");
-  response.cookies.delete("sb-refresh-token");
-  response.cookies.delete(`sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split("//")[1]?.split(".")[0]}-auth-token`);
+  // signout=true 파라미터 붙여서 리다이렉트
+  const response = NextResponse.redirect(new URL("/?signout=true", url.origin));
   response.headers.set("Cache-Control", "no-store");
-  
   return response;
 }
