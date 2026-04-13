@@ -64,7 +64,7 @@ export default function BoxOfficeSection({ movies }: Props) {
               {/* 하단 정보 */}
               <div className="p-2 md:p-3">
                 <p className="text-xs md:text-sm font-medium text-white truncate">{movie.title}</p>
-                <p className="text-[10px] md:text-xs text-gray-500 mt-0.5">일일 {movie.audiCnt}명</p>
+                <p className="text-[10px] md:text-xs text-red-500 mt-0.5">일일 {movie.audiCnt}명</p>
                 <p className="text-[10px] md:text-xs text-gray-600">누적 {movie.audiAcc}명</p>
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function BoxOfficeSection({ movies }: Props) {
             )}
             <span className="text-sm text-gray-200 flex-1 truncate">{movie.title}</span>
             <div className="text-right flex-shrink-0">
-              <div className="text-xs text-gray-500">{movie.audiCnt}명</div>
+              <div className="text-xs text-red-500">{movie.audiCnt}명</div>
               <div className="text-[10px] text-gray-600">누적 {movie.audiAcc}명</div>
             </div>
           </Link>
