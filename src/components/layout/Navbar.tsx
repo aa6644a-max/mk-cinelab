@@ -25,12 +25,10 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-800 bg-black/90 backdrop-blur-sm">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        {/* 로고 */}
         <Link href="/" className="text-white font-bold text-lg tracking-tight flex-shrink-0">
           MK <span className="text-red-500">CINELAB</span>
         </Link>
 
-        {/* 데스크탑 메뉴 */}
         <div className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
             <Link
@@ -51,9 +49,7 @@ export default function Navbar() {
         {/* 데스크탑 우측 */}
         <div className="hidden md:flex items-center gap-3">
           <SearchBar />
-          {loading ? (
-            <div className="w-20 h-8 bg-gray-800 rounded-lg animate-pulse" />
-          ) : user ? (
+          {user ? (
             <div className="flex items-center gap-3">
               {user.user_metadata?.avatar_url ? (
                 <Image src={user.user_metadata.avatar_url} alt="프로필" width={28} height={28} className="rounded-full" />
@@ -67,6 +63,8 @@ export default function Navbar() {
                 로그아웃
               </button>
             </div>
+          ) : loading ? (
+            <div className="w-20 h-8 bg-gray-800 rounded-lg animate-pulse" />
           ) : (
             <button
               onClick={signInWithGoogle}
@@ -77,7 +75,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* 모바일 우측 — 검색 + 햄버거 */}
+        {/* 모바일 우측 */}
         <div className="flex md:hidden items-center gap-3">
           <SearchBar />
           <button
@@ -89,7 +87,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* 모바일 드롭다운 메뉴 */}
+      {/* 모바일 드롭다운 */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-800 bg-black/95">
           <div className="px-4 py-3 space-y-1">
@@ -112,9 +110,7 @@ export default function Navbar() {
 
           {/* 모바일 로그인 */}
           <div className="px-4 pb-4 border-t border-gray-800 pt-3">
-            {loading ? (
-              <div className="h-9 bg-gray-800 rounded-lg animate-pulse" />
-            ) : user ? (
+            {user ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {user.user_metadata?.avatar_url ? (
@@ -130,6 +126,8 @@ export default function Navbar() {
                   로그아웃
                 </button>
               </div>
+            ) : loading ? (
+              <div className="h-9 bg-gray-800 rounded-lg animate-pulse" />
             ) : (
               <button
                 onClick={() => { signInWithGoogle(); setMenuOpen(false); }}
