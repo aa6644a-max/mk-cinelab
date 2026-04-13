@@ -47,8 +47,9 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-  };
+  await supabase.auth.signOut();
+  window.location.href = "/";
+};
 
   return { user, loading, signInWithGoogle, signOut };
 }
