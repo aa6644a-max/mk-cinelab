@@ -12,6 +12,7 @@ import { User } from "@supabase/supabase-js";
 
 interface Review {
   id: string;
+  user_id?: string;
   movie_title: string;
   movie_poster: string | null;
   content: string;
@@ -135,10 +136,13 @@ function MyReviewCard({
     setIsSaving(true);
     try {
       const res = await fetch("/api/review/" + review.id, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: editContent }),
-      });
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ 
+    content: editContent,
+    userId: review.user_id ?? null, // 추가 필요
+  }),
+});
       const data = await res.json();
       if (data.success) {
         onEdit(review.id, editContent.trim());
@@ -152,18 +156,22 @@ function MyReviewCard({
   };
 
   const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      const res = await fetch("/api/review/" + review.id, { method: "DELETE" });
-      const data = await res.json();
-      if (data.success) onDelete(review.id);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteConfirm(false);
-    }
-  };
+  setIsDeleting(true);
+  try {
+    const res = await fetch("/api/review/" + review.id, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: review.user_id ?? null }),
+    });
+    const data = await res.json();
+    if (data.success) onDelete(review.id);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
+  }
+};
 
   return (
     <div className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden hover:border-gray-600 transition-all">

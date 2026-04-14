@@ -25,9 +25,9 @@ export default function MypageClientPage() {
     Promise.all([
       supabase
         .from("reviews")
-        .select("id, movie_title, movie_poster, content, style, input_keywords, match_score, is_ai_assisted, is_user_edited, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
+  .select("id, user_id, movie_title, movie_poster, content, style, input_keywords, match_score, is_ai_assisted, is_user_edited, created_at")
+  .eq("user_id", user.id)
+  .order("created_at", { ascending: false }),
       supabase
         .from("profiles")
         .select("nickname, avatar_url, is_trusted, review_count")
