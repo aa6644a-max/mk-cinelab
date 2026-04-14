@@ -201,6 +201,7 @@ export default function ReviewLabPage() {
           content: review,
           matchScore,
           guestNickname: guestName,
+          guestEmail: guestEmail,  // 추가
           userId: user?.id ?? null, // 추가
 }),
       });
