@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { User } from "@supabase/supabase-js";
+import { User, AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
 export function useAuth() {
@@ -9,23 +9,23 @@ export function useAuth() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // 초기 세션 확인
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-      setInitialized(true);
-    });
+    supabase.auth.getSession().then((response: { data: { session: Session | null }; error: Error | null }) => {
+  setUser(response.data.session?.user ?? null);
+  setInitialized(true);
+});
 
-    // 상태 변화 구독
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        setUser(session?.user ?? null);
 
-      if (event === "SIGNED_IN" && session?.user?.email) {
-        supabase.rpc("claim_guest_reviews", {
-          p_user_id: session.user.id,
-          p_email: session.user.email,
-        }).catch(() => {});
+        if (event === "SIGNED_IN" && session?.user?.email) {
+          supabase.rpc("claim_guest_reviews", {
+            p_user_id: session.user.id,
+            p_email: session.user.email,
+          }).catch(() => {});
+        }
       }
-    });
+    );
 
     return () => listener.subscription.unsubscribe();
   }, []);

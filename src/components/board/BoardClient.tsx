@@ -192,7 +192,7 @@ export default function BoardClient({
       .select("is_admin")
       .eq("id", user.id)
       .single()
-      .then(({ data }) => setIsAdmin(data?.is_admin ?? false));
+      .then(({ data }: { data: { is_admin: boolean } | null }) => setIsAdmin(data?.is_admin ?? false));
   }, [user]);
 
   const handleDelete = (id: string) => {
