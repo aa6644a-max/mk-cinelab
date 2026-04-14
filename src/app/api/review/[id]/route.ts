@@ -8,27 +8,15 @@ interface Props {
 export async function DELETE(req: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
+    const body = await req.json().catch(() => ({}));
+    const { userId, isAdmin } = body;
+
     const supabase = await createServerSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: "로그인이 필요합니다" }, { status: 401 });
-    }
-
-    // 운영자 여부 확인
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("is_admin")
-      .eq("id", user.id)
-      .single();
-
-    const isAdmin = profile?.is_admin ?? false;
-
-    // 운영자는 모든 리뷰 삭제 가능, 일반 유저는 본인 것만
-    const query = supabase.from("reviews").delete().eq("id", id);
-
-    if (!isAdmin) {
-      query.eq("user_id", user.id);
+    // 운영자면 모든 리뷰 삭제, 아니면 본인 리뷰만
+    let query = supabase.from("reviews").delete().eq("id", id);
+    if (!isAdmin && userId) {
+      query = query.eq("user_id", userId);
     }
 
     const { error } = await query;
@@ -47,24 +35,23 @@ export async function DELETE(req: NextRequest, { params }: Props) {
 export async function PATCH(req: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
-    const supabase = await createServerSupabase();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "로그인이 필요합니다" }, { status: 401 });
-    }
-
-    const { content } = await req.json();
+    const { content, userId } = await req.json();
 
     if (!content?.trim()) {
       return NextResponse.json({ error: "내용을 입력해주세요" }, { status: 400 });
     }
 
+    if (!userId) {
+      return NextResponse.json({ error: "로그인이 필요합니다" }, { status: 401 });
+    }
+
+    const supabase = await createServerSupabase();
+
     const { data, error } = await supabase
       .from("reviews")
       .update({ content: content.trim(), is_user_edited: true })
       .eq("id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .select()
       .single();
 
