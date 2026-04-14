@@ -12,9 +12,14 @@ export default function MypageClientPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [dataLoading, setDataLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!initialized) return;
+    if (!user) {
+      setDataLoaded(true);
+      return;
+    }
 
     setDataLoading(true);
     Promise.all([
@@ -31,12 +36,16 @@ export default function MypageClientPage() {
     ]).then(([reviewsRes, profileRes]) => {
       setReviews(reviewsRes.data ?? []);
       setProfile(profileRes.data);
+    }).catch((err) => {
+      console.error("마이페이지 데이터 로딩 오류:", err);
+    }).finally(() => {
       setDataLoading(false);
+      setDataLoaded(true);
     });
-  }, [user]);
+  }, [user, initialized]);
 
-  // 초기화 전
-  if (!initialized) {
+  // 초기화 전 또는 데이터 로딩 중
+  if (!initialized || (user && !dataLoaded)) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="space-y-4">
@@ -64,18 +73,6 @@ export default function MypageClientPage() {
               메인으로 돌아가기
             </button>
           </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // 데이터 로딩 중
-  if (dataLoading) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <div className="space-y-4">
-          <div className="h-32 bg-gray-900 rounded-2xl animate-pulse" />
-          <div className="h-48 bg-gray-900 rounded-2xl animate-pulse" />
         </div>
       </div>
     );
