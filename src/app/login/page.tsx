@@ -16,38 +16,39 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (!email.trim() || !password.trim()) {
-      setError("이메일과 비밀번호를 입력해주세요");
+  if (!email.trim() || !password.trim()) {
+    setError("이메일과 비밀번호를 입력해주세요");
+    return;
+  }
+
+  setIsLoading(true);
+  try {
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+
+    if (loginError) {
+      if (loginError.message.includes("Invalid login credentials")) {
+        setError("이메일 또는 비밀번호가 올바르지 않습니다");
+      } else {
+        setError(loginError.message);
+      }
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const { error: loginError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      if (loginError) {
-        if (loginError.message.includes("Invalid login credentials")) {
-          setError("이메일 또는 비밀번호가 올바르지 않습니다");
-        } else {
-          setError(loginError.message);
-        }
-        return;
-      }
-
-      router.push("/");
-      router.refresh();
-    } catch (err) {
-      setError("로그인 중 오류가 발생했습니다");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // 로그인 성공 시 페이지 이동
+    window.location.href = "/";
+  } catch (err) {
+    console.error("로그인 오류:", err);
+    setError("로그인 중 오류가 발생했습니다");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
