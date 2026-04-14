@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, Sparkles, PenLine, Clock, Film } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Sparkles, PenLine, Clock, Film, Calendar, Timer, Tag } from "lucide-react";
 
 const STYLE_LABELS: Record<string, string> = {
   critic: "평론가 모드",
@@ -22,7 +22,32 @@ function getTimeAgo(dateStr: string): string {
   return "방금 전";
 }
 
-export default function ReviewDetailClient({ review }: { review: any }) {
+function formatRuntime(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}분`;
+  if (m === 0) return `${h}시간`;
+  return `${h}시간 ${m}분`;
+}
+
+function formatReleaseDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split("-");
+  return `${year}년 ${Number(month)}월 ${Number(day)}일`;
+}
+
+interface MovieDetail {
+  release_date?: string;
+  runtime?: number;
+  genres?: { id: number; name: string }[];
+}
+
+export default function ReviewDetailClient({
+  review,
+  movieDetail,
+}: {
+  review: any;
+  movieDetail: MovieDetail | null;
+}) {
   const profile = review.profiles;
   const detailHref = review.tmdb_id ? "/movie/tmdb-" + review.tmdb_id : null;
 
@@ -51,9 +76,38 @@ export default function ReviewDetailClient({ review }: { review: any }) {
             <Film className="w-6 h-6 text-gray-600" />
           </div>
         )}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <p className="text-xs text-red-500 font-semibold tracking-widest mb-1 uppercase">영화</p>
           <h1 className="text-xl font-black text-white mb-3">{review.movie_title}</h1>
+
+          {/* 영화 메타 정보 */}
+          <div className="space-y-1.5 mb-3">
+            {movieDetail?.release_date && (
+              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                <Calendar className="w-3 h-3 text-gray-600 flex-shrink-0" />
+                {formatReleaseDate(movieDetail.release_date)}
+              </div>
+            )}
+            {movieDetail?.runtime && movieDetail.runtime > 0 && (
+              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                <Timer className="w-3 h-3 text-gray-600 flex-shrink-0" />
+                {formatRuntime(movieDetail.runtime)}
+              </div>
+            )}
+            {movieDetail?.genres && movieDetail.genres.length > 0 && (
+              <div className="flex items-start gap-1.5 text-xs text-gray-400">
+                <Tag className="w-3 h-3 text-gray-600 flex-shrink-0 mt-0.5" />
+                <span className="flex flex-wrap gap-1">
+                  {movieDetail.genres.map((g) => (
+                    <span key={g.id} className="border border-gray-700 px-1.5 py-0.5 rounded-full text-[10px] text-gray-400">
+                      {g.name}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            )}
+          </div>
+
           {detailHref && (
             <Link href={detailHref}>
               <button className="text-xs text-gray-400 border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500 hover:text-white transition-colors">
@@ -76,8 +130,8 @@ export default function ReviewDetailClient({ review }: { review: any }) {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-white">
-  {profile?.nickname ?? review.guest_nickname ?? "익명"}
-</span>
+              {profile?.nickname ?? review.guest_nickname ?? "익명"}
+            </span>
             {profile?.is_trusted && (
               <span className="flex items-center gap-0.5 text-[9px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
                 <ShieldCheck className="w-2 h-2" /> 신뢰 마크

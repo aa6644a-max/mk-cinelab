@@ -1,4 +1,5 @@
 import { createServerSupabase } from "@/lib/supabase-server";
+import { getMovieDetail } from "@/lib/api";
 import { notFound } from "next/navigation";
 import ReviewDetailClient from "@/components/review/ReviewDetailClient";
 
@@ -24,5 +25,7 @@ export default async function ReviewDetailPage({ params }: Props) {
 
   if (!review) notFound();
 
-  return <ReviewDetailClient review={review} />;
+  const movieDetail = review.tmdb_id ? await getMovieDetail(review.tmdb_id) : null;
+
+  return <ReviewDetailClient review={review} movieDetail={movieDetail} />;
 }
