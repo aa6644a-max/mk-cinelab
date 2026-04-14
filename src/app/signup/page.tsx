@@ -54,12 +54,22 @@ export default function SignupPage() {
 
       if (data.user) {
         // profiles 테이블에 닉네임 업데이트
-        await supabase
-          .from("profiles")
-          .upsert({ id: data.user.id, nickname: nickname.trim() });
+        const { error: profileError } = await supabase
+  .from("profiles")
+  .upsert({
+    id: data.user.id,
+    nickname: nickname.trim(),
+    avatar_url: null,
+    is_trusted: false,
+    review_count: 0,
+  });
 
-        router.push("/");
-        router.refresh();
+if (profileError) {
+  console.error("프로필 생성 오류:", profileError);
+}
+
+router.push("/");
+router.refresh();
       }
     } catch (err) {
       setError("회원가입 중 오류가 발생했습니다");
