@@ -10,19 +10,21 @@ export function useAuth() {
 
   useEffect(() => {
     supabase.auth.getSession().then((result: { data: { session: { user: User } | null }; error: Error | null }) => {
-  setUser(result.data.session?.user ?? null);
-  setInitialized(true);
-});
+      setUser(result.data.session?.user ?? null);
+      setInitialized(true);
+    });
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, session: Session | null) => {
+      async (event: AuthChangeEvent, session: Session | null) => {
         setUser(session?.user ?? null);
 
         if (event === "SIGNED_IN" && session?.user?.email) {
-          supabase.rpc("claim_guest_reviews", {
-            p_user_id: session.user.id,
-            p_email: session.user.email,
-          }).catch(() => {});
+          try {
+            await supabase.rpc("claim_guest_reviews", {
+              p_user_id: session.user.id,
+              p_email: session.user.email,
+            });
+          } catch {}
         }
       }
     );
