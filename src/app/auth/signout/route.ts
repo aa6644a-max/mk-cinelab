@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerSupabase } from "@/lib/supabase-server";
 
 export async function GET(req: NextRequest) {
   const { origin } = new URL(req.url);
-  return NextResponse.redirect(`${origin}/?signout=true`);
+  const supabase = await createServerSupabase();
+  await supabase.auth.signOut();
+  return NextResponse.redirect(`${origin}/`);
 }

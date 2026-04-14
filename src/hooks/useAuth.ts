@@ -9,8 +9,8 @@ export function useAuth() {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then((response: { data: { session: Session | null }; error: Error | null }) => {
-  setUser(response.data.session?.user ?? null);
+    supabase.auth.getSession().then((result: { data: { session: { user: User } | null }; error: Error | null }) => {
+  setUser(result.data.session?.user ?? null);
   setInitialized(true);
 });
 
@@ -30,21 +30,11 @@ export function useAuth() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin + "/auth/callback",
-        queryParams: { prompt: "select_account" },
-      },
-    });
-  }, []);
-
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
     window.location.href = "/";
   }, []);
 
-  return { user, initialized, loading: !initialized, signInWithGoogle, signOut };
+  return { user, initialized, loading: !initialized, signOut };
 }

@@ -85,7 +85,7 @@ function LoadingOverlay({ messages }: { messages: string[] }) {
 }
 
 export default function ReviewLabPage() {
-  const { user, loading, signInWithGoogle } = useAuth();
+  const { user, loading } = useAuth();
 
   const [step, setStep] = useState(1);
   const [movieTitle, setMovieTitle] = useState("");
