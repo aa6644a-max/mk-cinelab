@@ -136,13 +136,13 @@ function MyReviewCard({
     setIsSaving(true);
     try {
       const res = await fetch("/api/review/" + review.id, {
-  method: "PATCH",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ 
-    content: editContent,
-    userId: review.user_id ?? null, // 추가 필요
-  }),
-});
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: editContent,
+          userId: review.user_id ?? null,
+        }),
+      });
       const data = await res.json();
       if (data.success) {
         onEdit(review.id, editContent.trim());
@@ -156,22 +156,25 @@ function MyReviewCard({
   };
 
   const handleDelete = async () => {
-  setIsDeleting(true);
-  try {
-    const res = await fetch("/api/review/" + review.id, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: review.user_id ?? null }),
-    });
-    const data = await res.json();
-    if (data.success) onDelete(review.id);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setIsDeleting(false);
-    setShowDeleteConfirm(false);
-  }
-};
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/review/" + review.id, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: review.user_id ?? null }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        onDelete(review.id);
+        setTimeout(() => window.location.reload(), 300);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
 
   return (
     <div className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden hover:border-gray-600 transition-all">
@@ -326,14 +329,14 @@ export default function MypageClient({
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-lg font-bold text-white">{nickname}</h1>
             {profile?.is_trusted ? (
-  <span className="flex items-center gap-1 text-[10px] border border-teal-700 text-teal-400 bg-teal-950/30 px-2 py-0.5 rounded-full">
-    <ShieldCheck className="w-2.5 h-2.5" /> 신뢰 마크
-  </span>
-) : (
-  <span className="text-[10px] text-gray-600">
-    신뢰 마크까지 {Math.max(0, 10 - reviews.length)}개 남음
-  </span>
-)}
+              <span className="flex items-center gap-1 text-[10px] border border-teal-700 text-teal-400 bg-teal-950/30 px-2 py-0.5 rounded-full">
+                <ShieldCheck className="w-2.5 h-2.5" /> 신뢰 마크
+              </span>
+            ) : (
+              <span className="text-[10px] text-gray-600">
+                신뢰 마크까지 {Math.max(0, 10 - reviews.length)}개 남음
+              </span>
+            )}
           </div>
           <p className="text-xs text-gray-500">{user.email}</p>
           <div className="flex gap-4 mt-3">
