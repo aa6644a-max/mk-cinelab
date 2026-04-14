@@ -25,8 +25,9 @@ export async function getBoxOffice() {
 // ✅ TMDB 영화 검색 (포스터 매칭용)
 export async function searchMovieTMDB(title: string) {
   try {
+    // 1차 시도 — 한국어 + 한국 지역 필터
     const res = await fetch(
-      `${TMDB_BASE}/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=ko-KR&region=KR`,
+      `${TMDB_BASE}/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=ko-KR&region=KR&include_adult=false`,
       { next: { revalidate: 3600 } }
     );
 
@@ -37,12 +38,20 @@ export async function searchMovieTMDB(title: string) {
 
     const data = await res.json();
 
-    if (!data.results) {
-      console.error(`[TMDB] 예상치 못한 응답:`, JSON.stringify(data));
+    if (!data.results || data.results.length === 0) {
       return null;
     }
 
-    return data.results[0] ?? null;
+    // 한국 영화 우선 정렬
+    // original_language가 ko인 것을 먼저, 그 다음 popularity 순
+    const sorted = [...data.results].sort((a: any, b: any) => {
+      const aIsKorean = a.original_language === "ko" ? 1 : 0;
+      const bIsKorean = b.original_language === "ko" ? 1 : 0;
+      if (aIsKorean !== bIsKorean) return bIsKorean - aIsKorean;
+      return b.popularity - a.popularity;
+    });
+
+    return sorted[0] ?? null;
 
   } catch (err) {
     console.error(`[TMDB] 검색 실패 — ${title}:`, err);
