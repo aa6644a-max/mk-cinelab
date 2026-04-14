@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Film, ShieldCheck, Sparkles, PenLine,
   BarChart2, Clock, Star
@@ -124,6 +125,7 @@ function MyReviewCard({
   onDelete: (id: string) => void;
   onEdit: (id: string, content: string) => void;
 }) {
+  const router = useRouter();
   const timeAgo = getTimeAgo(review.created_at);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(review.content);
@@ -177,7 +179,10 @@ function MyReviewCard({
   };
 
   return (
-    <div className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden hover:border-gray-600 transition-all">
+    <div
+      className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden hover:border-gray-600 transition-all cursor-pointer"
+      onClick={() => { if (!isEditing && !showDeleteConfirm) router.push(`/review/${review.id}`); }}
+    >
       <div className="flex gap-0">
         <div className="w-14 flex-shrink-0 bg-gray-800">
           {review.movie_poster ? (
@@ -204,13 +209,13 @@ function MyReviewCard({
             )}
             <div className="ml-auto flex items-center gap-2">
               <button
-                onClick={() => { setEditContent(review.content); setIsEditing(true); }}
+                onClick={(e) => { e.stopPropagation(); setEditContent(review.content); setIsEditing(true); }}
                 className="text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
               >
                 수정
               </button>
               <button
-                onClick={() => setShowDeleteConfirm(true)}
+                onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
                 className="text-[10px] text-gray-500 hover:text-red-400 transition-colors"
               >
                 삭제
@@ -219,7 +224,7 @@ function MyReviewCard({
           </div>
 
           {isEditing ? (
-            <div className="space-y-2">
+            <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
@@ -247,7 +252,7 @@ function MyReviewCard({
           )}
 
           {showDeleteConfirm && (
-            <div className="mt-2 p-2 bg-red-950/30 border border-red-900 rounded-lg">
+            <div className="mt-2 p-2 bg-red-950/30 border border-red-900 rounded-lg" onClick={(e) => e.stopPropagation()}>
               <p className="text-xs text-red-400 mb-2">정말 삭제하시겠습니까?</p>
               <div className="flex gap-2">
                 <button
