@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
@@ -53,25 +51,24 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        // profiles 테이블에 닉네임 업데이트
         const { error: profileError } = await supabase
-  .from("profiles")
-  .upsert({
-    id: data.user.id,
-    nickname: nickname.trim(),
-    avatar_url: null,
-    is_trusted: false,
-    review_count: 0,
-  });
+          .from("profiles")
+          .upsert({
+            id: data.user.id,
+            nickname: nickname.trim(),
+            avatar_url: null,
+            is_trusted: false,
+            review_count: 0,
+          });
 
-if (profileError) {
-  console.error("프로필 생성 오류:", profileError);
-}
+        if (profileError) {
+          console.error("프로필 생성 오류:", profileError);
+        }
 
-router.push("/");
-router.refresh();
+        window.location.href = "/";
       }
     } catch (err) {
+      console.error("회원가입 오류:", err);
       setError("회원가입 중 오류가 발생했습니다");
     } finally {
       setIsLoading(false);
