@@ -11,7 +11,6 @@ const ADMIN_EMAIL = "aa6644a@gmail.com";
 const GENDER_LABELS: Record<string, string> = {
   male: "남성",
   female: "여성",
-  other: "기타",
 };
 
 interface Member {
@@ -77,7 +76,6 @@ export default function AdminMembersPage() {
   // 통계
   const totalMale = members.filter((m) => m.gender === "male").length;
   const totalFemale = members.filter((m) => m.gender === "female").length;
-  const totalOther = members.filter((m) => m.gender === "other").length;
   const noGender = members.filter((m) => !m.gender).length;
 
   const ageGroups: Record<string, number> = {};
@@ -109,7 +107,7 @@ export default function AdminMembersPage() {
       {/* 통계 카드 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <StatCard label="전체 회원" value={members.length + "명"} icon={<Users className="w-4 h-4" />} />
-        <StatCard label="성별 분포" value={`남 ${totalMale} / 여 ${totalFemale}${totalOther > 0 ? ` / 기타 ${totalOther}` : ""}${noGender > 0 ? ` / 미기재 ${noGender}` : ""}`} small />
+        <StatCard label="성별 분포" value={`남 ${totalMale} / 여 ${totalFemale}${noGender > 0 ? ` / 미기재 ${noGender}` : ""}`} small />
         <StatCard
           label="연령 분포"
           value={Object.entries(ageGroups).sort().map(([k, v]) => `${k} ${v}명`).join(" · ")}
@@ -159,9 +157,7 @@ export default function AdminMembersPage() {
                       <span className={`text-xs px-2 py-0.5 rounded-full border ${
                         member.gender === "male"
                           ? "border-blue-800 text-blue-400"
-                          : member.gender === "female"
-                          ? "border-pink-800 text-pink-400"
-                          : "border-gray-700 text-gray-400"
+                          : "border-pink-800 text-pink-400"
                       }`}>
                         {GENDER_LABELS[member.gender]}
                       </span>
