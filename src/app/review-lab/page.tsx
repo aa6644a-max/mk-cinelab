@@ -111,7 +111,6 @@ export default function ReviewLabPage() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -221,25 +220,28 @@ export default function ReviewLabPage() {
 
   const handleSearchInput = (value: string) => {
     setMovieTitle(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (value.trim().length < 2) {
+    if (value.trim().length === 0) {
       setSearchResults([]);
       setShowDropdown(false);
-      return;
     }
-    debounceRef.current = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const res = await fetch("/api/search?q=" + encodeURIComponent(value));
-        const data = await res.json();
-        setSearchResults(data.results ?? []);
-        setShowDropdown(true);
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300);
+  };
+
+  const handleSearch = async () => {
+    const q = movieTitle.trim();
+    if (q.length < 1) return;
+    setIsSearching(true);
+    setShowDropdown(false);
+    try {
+      const res = await fetch("/api/search?q=" + encodeURIComponent(q));
+      const data = await res.json();
+      setSearchResults(data.results ?? []);
+      setShowDropdown(true);
+    } catch {
+      setSearchResults([]);
+      setShowDropdown(true);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleSelectMovie = (title: string) => {
@@ -276,31 +278,43 @@ export default function ReviewLabPage() {
         <div className="animate-in fade-in duration-300 space-y-4">
           <div ref={searchRef} className="relative">
             <label className="text-sm text-gray-400 mb-2 block">리뷰를 쓸 영화 제목을 입력하세요</label>
-            <div className={cn(
-              "flex items-center gap-2 bg-gray-900 border rounded-xl px-4 py-3 transition-colors",
-              showDropdown ? "border-red-600" : "border-gray-700 focus-within:border-red-600"
-            )}>
-              {isSearching ? (
-                <div className="w-4 h-4 border border-gray-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
-              ) : (
-                <Search className="w-4 h-4 text-gray-500 flex-shrink-0" />
-              )}
-              <input
-                type="text"
-                value={movieTitle}
-                onChange={(e) => handleSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && movieTitle.trim()) { setShowDropdown(false); setStep(2); }
-                  if (e.key === "Escape") setShowDropdown(false);
-                }}
-                placeholder="예: 인터스텔라, 기생충, Oppenheimer..."
-                className="flex-1 bg-transparent text-white placeholder-gray-600 focus:outline-none text-base"
-              />
-              {movieTitle && (
-                <button onClick={() => { setMovieTitle(""); setSearchResults([]); setShowDropdown(false); }}>
-                  <X className="w-4 h-4 text-gray-600 hover:text-gray-400" />
-                </button>
-              )}
+            <div className="flex gap-2">
+              <div className={cn(
+                "flex items-center gap-2 flex-1 bg-gray-900 border rounded-xl px-4 py-3 transition-colors",
+                showDropdown ? "border-red-600" : "border-gray-700 focus-within:border-red-600"
+              )}>
+                <input
+                  type="text"
+                  value={movieTitle}
+                  onChange={(e) => handleSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSearch();
+                    if (e.key === "Escape") setShowDropdown(false);
+                  }}
+                  placeholder="예: 인터스텔라, 기생충..."
+                  className="flex-1 bg-transparent text-white placeholder-gray-600 focus:outline-none text-base"
+                />
+                {movieTitle && (
+                  <button onClick={() => { setMovieTitle(""); setSearchResults([]); setShowDropdown(false); }}>
+                    <X className="w-4 h-4 text-gray-600 hover:text-gray-400" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={handleSearch}
+                disabled={!movieTitle.trim() || isSearching}
+                className={cn(
+                  "flex items-center gap-1.5 px-5 py-3 rounded-xl font-semibold text-sm transition-all flex-shrink-0",
+                  movieTitle.trim() && !isSearching
+                    ? "bg-red-600 hover:bg-red-500 text-white"
+                    : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                )}
+              >
+                {isSearching
+                  ? <div className="w-4 h-4 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+                  : <Search className="w-4 h-4" />}
+                검색
+              </button>
             </div>
             {showDropdown && searchResults.length > 0 && (
               <div className="absolute top-full mt-1 left-0 right-0 bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl z-50">
