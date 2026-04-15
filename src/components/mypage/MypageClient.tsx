@@ -119,43 +119,14 @@ function getTimeAgo(dateStr: string): string {
 function MyReviewCard({
   review,
   onDelete,
-  onEdit,
 }: {
   review: Review;
   onDelete: (id: string) => void;
-  onEdit: (id: string, content: string) => void;
 }) {
   const router = useRouter();
   const timeAgo = getTimeAgo(review.created_at);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState(review.content);
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  const handleSaveEdit = async () => {
-    if (!editContent.trim()) return;
-    setIsSaving(true);
-    try {
-      const res = await fetch("/api/review/" + review.id, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: editContent,
-          userId: review.user_id ?? null,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        onEdit(review.id, editContent.trim());
-        setIsEditing(false);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -168,7 +139,6 @@ function MyReviewCard({
       const data = await res.json();
       if (data.success) {
         onDelete(review.id);
-        setTimeout(() => window.location.reload(), 300);
       }
     } catch (err) {
       console.error(err);
@@ -181,7 +151,7 @@ function MyReviewCard({
   return (
     <div
       className="bg-gray-900/60 border border-gray-800 rounded-xl overflow-hidden hover:border-gray-600 transition-all cursor-pointer"
-      onClick={() => { if (!isEditing && !showDeleteConfirm) router.push(`/review/${review.id}`); }}
+      onClick={() => { if (!showDeleteConfirm) router.push(`/review/${review.id}`); }}
     >
       <div className="flex gap-0">
         <div className="w-14 flex-shrink-0 bg-gray-800">
@@ -209,7 +179,7 @@ function MyReviewCard({
             )}
             <div className="ml-auto flex items-center gap-2">
               <button
-                onClick={(e) => { e.stopPropagation(); setEditContent(review.content); setIsEditing(true); }}
+                onClick={(e) => { e.stopPropagation(); router.push(`/review/${review.id}`); }}
                 className="text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
               >
                 수정
@@ -223,33 +193,7 @@ function MyReviewCard({
             </div>
           </div>
 
-          {isEditing ? (
-            <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
-              <textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                rows={4}
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-red-600 resize-none"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSaveEdit}
-                  disabled={isSaving}
-                  className="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {isSaving ? "저장 중..." : "저장"}
-                </button>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="text-xs border border-gray-700 text-gray-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors"
-                >
-                  취소
-                </button>
-              </div>
-            </div>
-          ) : (
-            <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{review.content}</p>
-          )}
+          <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{review.content}</p>
 
           {showDeleteConfirm && (
             <div className="mt-2 p-2 bg-red-950/30 border border-red-900 rounded-lg" onClick={(e) => e.stopPropagation()}>
@@ -272,7 +216,7 @@ function MyReviewCard({
             </div>
           )}
 
-          {!isEditing && (
+          {!showDeleteConfirm && (
             <div className="flex items-center gap-2 mt-2">
               <span className="text-[10px] text-gray-600 border border-gray-800 px-1.5 py-0.5 rounded-full">
                 {STYLE_LABELS[review.style]}
@@ -303,12 +247,6 @@ export default function MypageClient({
 
   const handleDeleteReview = (id: string) => {
     setReviews((prev) => prev.filter((r) => r.id !== id));
-  };
-
-  const handleEditReview = (id: string, content: string) => {
-    setReviews((prev) =>
-      prev.map((r) => r.id === id ? { ...r, content, is_user_edited: true } : r)
-    );
   };
 
   const genreData = analyzeGenreMap(reviews);
@@ -400,7 +338,6 @@ export default function MypageClient({
                 key={review.id}
                 review={review}
                 onDelete={handleDeleteReview}
-                onEdit={handleEditReview}
               />
             ))
           )}
