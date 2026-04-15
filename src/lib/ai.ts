@@ -77,7 +77,7 @@ export async function generateMovieReview(
   userInput: string,
   keywords: string[],
   style: string
-) {
+): Promise<{ review: string; score: number }> {
   const styleGuide: Record<string, string> = {
     critic: "씨네21 영화 평론가 스타일 — 영화적 맥락과 감독의 의도를 분석하는 지적이고 절제된 문체",
     emotional: "감성적이고 따뜻한 문체 — 영화가 남긴 여운과 감정의 결을 섬세하게 묘사",
@@ -86,7 +86,7 @@ export async function generateMovieReview(
   };
 
   const prompt = `
-당신은 전문 영화 비평가입니다. 아래 정보를 바탕으로 영화 리뷰를 작성해 주세요.
+당신은 전문 영화 비평가입니다. 아래 정보를 바탕으로 영화 리뷰를 작성하고, 감상 반영도를 평가해 주세요.
 
 [영화 제목]
 ${movieTitle}
@@ -104,10 +104,58 @@ ${styleGuide[style] ?? styleGuide.critic}
 - 반드시 사용자의 실제 감상과 키워드를 리뷰에 녹여낼 것
 - AI가 쓴 느낌이 나지 않도록 자연스럽게 작성
 - 스포일러 없이 작성
-- 순수 리뷰 텍스트만 반환 (JSON 형식 아님)
 - 분량: sns 스타일은 200자 이내, 나머지는 300~500자
+
+[감상 반영도 채점 기준 — 0~100점]
+- 사용자 감상의 핵심 감정이 리뷰에 살아있는가 (40점)
+- 사용자가 언급한 장면·요소·표현이 반영됐는가 (35점)
+- 선택한 감정 키워드의 뉘앙스가 자연스럽게 녹아들었는가 (25점)
+
+[응답 형식 — 반드시 아래 JSON만 반환, 다른 텍스트 없음]
+{"review":"리뷰 텍스트","score":숫자}
 `;
 
-  const text = await generateWithRetry(prompt);
-  return text.trim();
+  const raw = await generateWithRetry(prompt);
+
+  // JSON 파싱 시도
+  try {
+    const cleaned = raw
+      .replace(/```json[\s\S]*?```/g, (m) => m.replace(/```json|```/g, ""))
+      .replace(/```/g, "")
+      .trim();
+
+    // JSON 블록만 추출 (앞뒤 설명 텍스트 제거)
+    const jsonMatch = cleaned.match(/\{[\s\S]*"review"[\s\S]*"score"[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      const review = String(parsed.review ?? "").trim();
+      const score = Math.min(Math.max(Math.round(Number(parsed.score)), 0), 100);
+      if (review && !isNaN(score)) {
+        return { review, score };
+      }
+    }
+  } catch {
+    console.warn("[AI] JSON 파싱 실패, 폴백 처리");
+  }
+
+  // 폴백 1: score만 정규식으로 추출, review는 전체 텍스트
+  const scoreMatch = raw.match(/"score"\s*:\s*(\d+)/);
+  if (scoreMatch) {
+    const reviewMatch = raw.match(/"review"\s*:\s*"([\s\S]+?)(?<!\\)"/);
+    const review = reviewMatch
+      ? reviewMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"')
+      : raw.replace(/\{[\s\S]*\}/, "").trim() || raw.trim();
+    const score = Math.min(Math.max(parseInt(scoreMatch[1]), 0), 100);
+    if (review) return { review, score };
+  }
+
+  // 폴백 2: JSON 파싱 완전 실패 → 텍스트 전체를 리뷰로, 키워드 방식으로 점수 계산
+  const review = raw.trim();
+  const matchedCount = keywords.filter((kw) => review.includes(kw.replace("#", ""))).length;
+  const total = keywords.length;
+  const score = total === 0
+    ? 91
+    : Math.min(Math.round(70 + (matchedCount / total) * 25 + Math.random() * 5), 99);
+
+  return { review, score };
 }

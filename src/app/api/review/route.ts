@@ -13,33 +13,26 @@ export async function POST(req: NextRequest) {
 
     console.log("[review] 입력값:", { movieTitle, keywords, style });
 
-    // 1. Gemini 리뷰 생성
+    // 1. Gemini 리뷰 생성 + 감상 반영도 채점
     let review: string;
+    let matchScore: number;
     try {
-      review = await generateMovieReview(movieTitle, userInput, keywords ?? [], style);
-      console.log("[review] 생성 완료, 길이:", review.length);
+      const result = await generateMovieReview(movieTitle, userInput, keywords ?? [], style);
+      review = result.review;
+      matchScore = result.score;
+      console.log("[review] 생성 완료, 길이:", review.length, "반영도:", matchScore);
     } catch (err) {
       console.error("[review] Gemini 실패:", err);
       return NextResponse.json({ error: "AI 호출 실패" }, { status: 500 });
     }
 
-    // 2. 키워드 반영도 계산
-    const matchedCount = (keywords ?? []).filter((kw: string) =>
-      review.includes(kw.replace("#", ""))
-    ).length;
-    const totalKeywords = (keywords ?? []).length;
-    const matchScore =
-      totalKeywords === 0
-        ? 91 // 키워드 없으면 기본값
-        : Math.round(70 + (matchedCount / totalKeywords) * 25 + Math.random() * 5);
-
-    // 3. TMDB 포스터
+    // 2. TMDB 포스터
     const tmdb = await searchMovieTMDB(movieTitle).catch(() => null);
     const poster = tmdb?.poster_path
       ? `https://image.tmdb.org/t/p/w780${tmdb.poster_path}`
       : null;
 
-    return NextResponse.json({ review, matchScore: Math.min(matchScore, 99), poster });
+    return NextResponse.json({ review, matchScore, poster });
   } catch (err) {
     console.error("[review] 전체 오류:", err);
     return NextResponse.json({ error: "서버 오류" }, { status: 500 });
