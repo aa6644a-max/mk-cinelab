@@ -15,9 +15,6 @@ export function getSupabaseClient(): SupabaseClient {
           persistSession: true,
           detectSessionInUrl: true,
           flowType: "pkce",
-          lock: async (_name, _acquireTimeout, fn) => {
-            return await fn();
-          },
         },
       }
     );

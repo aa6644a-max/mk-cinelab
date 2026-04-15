@@ -35,8 +35,8 @@ export default function LatestReviews() {
 
   const totalPages = Math.ceil(totalCount / PER_PAGE);
 
-  const fetchReviews = async (currentPage: number) => {
-    setIsLoading(true);
+  const fetchReviews = async (currentPage: number, silent = false) => {
+    if (!silent) setIsLoading(true);
     const from = (currentPage - 1) * PER_PAGE;
     const to = from + PER_PAGE - 1;
 
@@ -53,14 +53,14 @@ export default function LatestReviews() {
 
     setReviews(data ?? []);
     setTotalCount(count ?? 0);
-    setIsLoading(false);
+    if (!silent) setIsLoading(false);
   };
 
   useEffect(() => {
     fetchReviews(page);
 
-    // 페이지 포커스될 때 새로고침
-    const handleFocus = () => fetchReviews(page);
+    // 탭 복귀 시 로딩 표시 없이 조용히 갱신
+    const handleFocus = () => fetchReviews(page, true);
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, [page]);

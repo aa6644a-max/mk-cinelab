@@ -15,6 +15,7 @@ function notifyListeners() {
 
 // 구독은 한 번만 등록
 let _subscriptionStarted = false;
+let _signingOut = false;
 
 function ensureSubscription() {
   if (_subscriptionStarted) return;
@@ -28,7 +29,15 @@ function ensureSubscription() {
 
   supabase.auth.onAuthStateChange(
     async (event: AuthChangeEvent, session: Session | null) => {
-      _user = session?.user ?? null;
+      // 로그아웃 진행 중 TOKEN_REFRESHED가 뒤늦게 오면 무시
+      if (_signingOut && event !== "SIGNED_OUT") return;
+
+      if (event === "SIGNED_OUT") {
+        _signingOut = false;
+        _user = null;
+      } else {
+        _user = session?.user ?? null;
+      }
       notifyListeners();
 
       if (event === "SIGNED_IN" && session?.user?.email) {
@@ -65,9 +74,10 @@ export function useAuth() {
   }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    _signingOut = true;
     _user = null;
     notifyListeners();
+    await supabase.auth.signOut();
     window.location.href = "/";
   }, []);
 
