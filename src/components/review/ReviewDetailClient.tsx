@@ -199,9 +199,18 @@ export default function ReviewDetailClient({
           )}
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-medium text-white">
-                {profile?.nickname ?? review.guest_nickname ?? "익명"}
-              </span>
+              {profile?.id ? (
+                <Link
+                  href={`/user/${profile.id}`}
+                  className="text-sm font-medium text-white hover:text-red-400 transition-colors"
+                >
+                  {profile.nickname}
+                </Link>
+              ) : (
+                <span className="text-sm font-medium text-white">
+                  {review.guest_nickname ?? "익명"}
+                </span>
+              )}
               {profile?.is_trusted && (
                 <span className="flex items-center gap-0.5 text-[9px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
                   <ShieldCheck className="w-2 h-2" /> 신뢰 마크
