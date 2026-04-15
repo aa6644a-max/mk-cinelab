@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Film, ShieldCheck, Sparkles, PenLine,
-  BarChart2, Clock, Star
+  BarChart2, Clock, Star, Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
@@ -271,6 +271,9 @@ export default function MypageClient({
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-lg font-bold text-white">{nickname}</h1>
+            <Link href="/settings" className="ml-auto text-gray-500 hover:text-gray-300 transition-colors" title="계정 설정">
+              <Settings className="w-4 h-4" />
+            </Link>
             {profile?.is_trusted ? (
               <span className="flex items-center gap-1 text-[10px] border border-teal-700 text-teal-400 bg-teal-950/30 px-2 py-0.5 rounded-full">
                 <ShieldCheck className="w-2.5 h-2.5" /> 신뢰 마크
