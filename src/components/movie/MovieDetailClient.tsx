@@ -178,7 +178,7 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
               리뷰
               {reviews.length > 0 && <span className="text-gray-500 font-normal ml-2">{reviews.length}개</span>}
             </h2>
-            <Link href="/review-lab">
+            <Link href={`/review-lab?tmdbId=${movie.id}&title=${encodeURIComponent(movie.title)}&poster=${encodeURIComponent(movie.poster_path ?? "")}&year=${movie.release_date?.slice(0, 4) ?? ""}&rating=${movie.vote_average ?? 0}&genres=${encodeURIComponent(movie.genres.map((g: any) => g.id).join(","))}`}>
               <button className="text-xs text-red-500 border border-red-900 px-3 py-1.5 rounded-lg hover:bg-red-950/30 transition-colors">
                 리뷰 작성하기
               </button>

@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   Sparkles, Copy, Send, RotateCcw,
@@ -93,6 +94,7 @@ function LoadingOverlay({ messages }: { messages: string[] }) {
 
 export default function ReviewLabPage() {
   const { user, loading } = useAuth();
+  const searchParams = useSearchParams();
 
   const [step, setStep] = useState(1);
   const [movieTitle, setMovieTitle] = useState("");
@@ -119,6 +121,35 @@ export default function ReviewLabPage() {
   const [selectedMovie, setSelectedMovie] = useState<any | null>(null);
 
   const resultRef = useRef<HTMLDivElement>(null);
+
+  // 영화 상세 페이지에서 진입 시 영화 선택 단계 자동 건너뜀
+  useEffect(() => {
+    const tmdbId = searchParams.get("tmdbId");
+    const title = searchParams.get("title");
+    if (!tmdbId || !title) return;
+
+    const posterPath = searchParams.get("poster") ?? "";
+    const year = searchParams.get("year") ?? "";
+    const rating = parseFloat(searchParams.get("rating") ?? "0");
+    const genreIds = (searchParams.get("genres") ?? "")
+      .split(",")
+      .map(Number)
+      .filter(Boolean);
+
+    setMovieTitle(title);
+    setSelectedMovie({
+      id: Number(tmdbId),
+      title,
+      original_title: title,
+      poster_path: posterPath,
+      release_date: year ? year + "-01-01" : "",
+      vote_average: rating,
+      genre_ids: genreIds,
+      overview: "",
+    });
+    setStep(2);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleKeyword = (kw: string) => {
     setSelectedKeywords((prev) =>
@@ -447,7 +478,11 @@ export default function ReviewLabPage() {
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg w-fit">
             <Film className="w-4 h-4 text-red-500" />
             <span className="text-sm text-white font-medium">{movieTitle}</span>
-            <button onClick={() => { setStep(1); setSelectedMovie(null); setShowDropdown(false); }} className="text-gray-600 hover:text-gray-400 text-xs ml-1">수정</button>
+            <button onClick={() => {
+              const tmdbId = searchParams.get("tmdbId");
+              if (tmdbId) { window.history.back(); return; }
+              setStep(1); setSelectedMovie(null); setShowDropdown(false);
+            }} className="text-gray-600 hover:text-gray-400 text-xs ml-1">수정</button>
           </div>
 
           <div>
