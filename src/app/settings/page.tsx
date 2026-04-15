@@ -234,6 +234,8 @@ function ProfileSection({
         setError(data.error ?? "저장 실패");
         return;
       }
+      // auth 메타데이터 갱신 → 네비바 즉시 반영
+      await supabase.auth.refreshSession();
       setSuccess(true);
       setTimeout(() => onSaved({ nickname: nickname.trim(), bio: bio.trim() || null }), 800);
     } catch {

@@ -47,6 +47,11 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // auth user_metadata도 동기화 (네비바 등 user.user_metadata.name 사용처 반영)
+    await adminClient.auth.admin.updateUserById(userId, {
+      user_metadata: { name: nickname.trim() },
+    });
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[user/profile]", err);
