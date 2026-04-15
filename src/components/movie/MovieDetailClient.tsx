@@ -191,12 +191,17 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
               <p className="text-xs mt-1">첫 번째 리뷰를 작성해보세요</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {reviews.map((review: any) => {
                 const profile = review.profiles;
                 return (
-                  <div key={review.id} className="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <Link
+                    key={review.id}
+                    href={`/review/${review.id}`}
+                    className="block bg-gray-900/60 border border-gray-800 rounded-xl p-4 hover:border-gray-600 transition-all cursor-pointer"
+                  >
+                    {/* 작성자 */}
+                    <div className="flex items-center gap-2 mb-2.5 flex-wrap">
                       {profile?.avatar_url ? (
                         <Image src={profile.avatar_url} alt={profile.nickname} width={22} height={22} className="rounded-full" />
                       ) : (
@@ -222,7 +227,11 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
                       )}
                       <span className="text-[10px] text-gray-600 ml-auto">{getTimeAgo(review.created_at)}</span>
                     </div>
-                    <p className="text-sm text-gray-300 leading-relaxed">{review.content}</p>
+
+                    {/* 미리보기 (3줄 제한) */}
+                    <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">{review.content}</p>
+
+                    {/* 하단 메타 */}
                     <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-800">
                       <span className="text-[10px] text-gray-600 border border-gray-800 px-1.5 py-0.5 rounded-full">
                         {STYLE_LABELS[review.style] ?? review.style}
@@ -230,9 +239,9 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
                       {review.input_keywords?.slice(0, 3).map((kw: string) => (
                         <span key={kw} className="text-[10px] text-gray-600">{kw}</span>
                       ))}
-                      <span className="text-[10px] text-gray-600 ml-auto">반영도 {review.match_score}%</span>
+                      <span className="text-[10px] text-red-500 ml-auto">전체 리뷰 보기 →</span>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
