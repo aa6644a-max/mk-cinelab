@@ -6,8 +6,15 @@ import Image from "next/image";
 import {
   Sparkles, Copy, Send, RotateCcw,
   CheckCircle, Film, Tag, Pen,
-  Search, X
+  Search, X, Star, Calendar, ChevronRight
 } from "lucide-react";
+
+const TMDB_GENRES: Record<number, string> = {
+  28: "액션", 12: "어드벤처", 16: "애니메이션", 35: "코미디", 80: "범죄",
+  99: "다큐멘터리", 18: "드라마", 10751: "가족", 14: "판타지", 36: "역사",
+  27: "공포", 10402: "음악", 9648: "미스터리", 10749: "로맨스", 878: "SF",
+  10770: "TV 영화", 53: "스릴러", 10752: "전쟁", 37: "서부",
+};
 import { cn } from "@/lib/utils";
 
 const EMOTION_KEYWORDS = [
@@ -109,6 +116,7 @@ export default function ReviewLabPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<any | null>(null);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -244,8 +252,9 @@ export default function ReviewLabPage() {
     }
   };
 
-  const handleSelectMovie = (title: string) => {
-    setMovieTitle(title);
+  const handleSelectMovie = (movie: any) => {
+    setMovieTitle(movie.title);
+    setSelectedMovie(movie);
     setShowDropdown(false);
     setSearchResults([]);
   };
@@ -253,6 +262,9 @@ export default function ReviewLabPage() {
   const handleReset = () => {
     setStep(1);
     setMovieTitle("");
+    setSelectedMovie(null);
+    setSearchResults([]);
+    setShowDropdown(false);
     setUserInput("");
     setSelectedKeywords([]);
     setSelectedStyle(null);
@@ -276,12 +288,13 @@ export default function ReviewLabPage() {
       {/* Step 1: 영화 선택 */}
       {step === 1 && (
         <div className="animate-in fade-in duration-300 space-y-4">
-          <div ref={searchRef} className="relative">
+          {/* 검색 인풋 */}
+          <div ref={searchRef}>
             <label className="text-sm text-gray-400 mb-2 block">리뷰를 쓸 영화 제목을 입력하세요</label>
             <div className="flex gap-2">
               <div className={cn(
                 "flex items-center gap-2 flex-1 bg-gray-900 border rounded-xl px-4 py-3 transition-colors",
-                showDropdown ? "border-red-600" : "border-gray-700 focus-within:border-red-600"
+                "border-gray-700 focus-within:border-red-600"
               )}>
                 <input
                   type="text"
@@ -295,7 +308,7 @@ export default function ReviewLabPage() {
                   className="flex-1 bg-transparent text-white placeholder-gray-600 focus:outline-none text-base"
                 />
                 {movieTitle && (
-                  <button onClick={() => { setMovieTitle(""); setSearchResults([]); setShowDropdown(false); }}>
+                  <button onClick={() => { setMovieTitle(""); setSearchResults([]); setShowDropdown(false); setSelectedMovie(null); }}>
                     <X className="w-4 h-4 text-gray-600 hover:text-gray-400" />
                   </button>
                 )}
@@ -316,59 +329,126 @@ export default function ReviewLabPage() {
                 검색
               </button>
             </div>
-            {showDropdown && searchResults.length > 0 && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl z-50">
-                {searchResults.map((movie, i) => (
-                  <button
-                    key={movie.id}
-                    onClick={() => handleSelectMovie(movie.title)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors text-left",
-                      i < searchResults.length - 1 && "border-b border-gray-800"
-                    )}
-                  >
-                    <div className="w-8 h-12 flex-shrink-0 bg-gray-800 rounded overflow-hidden">
-                      {movie.poster_path ? (
-                        <Image src={"https://image.tmdb.org/t/p/w92" + movie.poster_path} alt={movie.title} width={32} height={48} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center"><Film className="w-3 h-3 text-gray-600" /></div>
+          </div>
+
+          {/* 검색 결과 리스트 */}
+          {showDropdown && (
+            <div className="bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden">
+              {searchResults.length > 0 ? (
+                <>
+                  {searchResults.map((movie, i) => (
+                    <button
+                      key={movie.id}
+                      onClick={() => handleSelectMovie(movie)}
+                      className={cn(
+                        "w-full flex items-center gap-4 px-4 py-3 hover:bg-gray-800 transition-colors text-left",
+                        i < searchResults.length - 1 && "border-b border-gray-800",
+                        selectedMovie?.id === movie.id && "bg-gray-800"
                       )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{movie.title}</p>
-                      {movie.original_title !== movie.title && (
-                        <p className="text-[10px] text-gray-500 truncate">{movie.original_title}</p>
-                      )}
-                      <div className="flex items-center gap-2 mt-0.5">
-                        {movie.release_date && <span className="text-[10px] text-gray-600">{movie.release_date.slice(0, 4)}</span>}
-                        {movie.vote_average > 0 && <span className="text-[10px] text-yellow-500">★ {movie.vote_average.toFixed(1)}</span>}
+                    >
+                      <div className="w-10 h-14 flex-shrink-0 bg-gray-800 rounded-lg overflow-hidden">
+                        {movie.poster_path ? (
+                          <Image src={"https://image.tmdb.org/t/p/w92" + movie.poster_path} alt={movie.title} width={40} height={56} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center"><Film className="w-3 h-3 text-gray-600" /></div>
+                        )}
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-white truncate">{movie.title}</p>
+                        {movie.original_title !== movie.title && (
+                          <p className="text-[11px] text-gray-500 truncate">{movie.original_title}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          {movie.release_date && (
+                            <span className="text-[11px] text-gray-500">{movie.release_date.slice(0, 4)}</span>
+                          )}
+                          {movie.vote_average > 0 && (
+                            <span className="flex items-center gap-0.5 text-[11px] text-yellow-500">
+                              <Star className="w-2.5 h-2.5 fill-yellow-500" />{movie.vote_average.toFixed(1)}
+                            </span>
+                          )}
+                          {movie.genre_ids?.slice(0, 2).map((gid: number) => TMDB_GENRES[gid]).filter(Boolean).map((name: string) => (
+                            <span key={name} className="text-[10px] text-gray-600 border border-gray-700 px-1.5 py-0.5 rounded-full">{name}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                    </button>
+                  ))}
+                  <div className="px-4 py-2 border-t border-gray-800">
+                    <p className="text-[10px] text-gray-600 text-center">TMDB 검색 결과 · 영화를 선택해주세요</p>
+                  </div>
+                </>
+              ) : (
+                <div className="py-10 text-center">
+                  <Film className="w-7 h-7 mx-auto mb-2 text-gray-600" />
+                  <p className="text-sm text-gray-500">검색 결과가 없습니다</p>
+                  <p className="text-xs text-gray-600 mt-1">제목을 직접 입력 후 감상 입력하기를 눌러 진행할 수 있습니다</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 선택된 영화 정보 */}
+          {selectedMovie && (
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 bg-gray-900/80 border border-red-900/50 rounded-2xl overflow-hidden">
+              <div className="flex gap-4 p-4">
+                {selectedMovie.poster_path ? (
+                  <Image
+                    src={"https://image.tmdb.org/t/p/w185" + selectedMovie.poster_path}
+                    alt={selectedMovie.title}
+                    width={72}
+                    height={108}
+                    className="rounded-xl object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-[72px] h-[108px] bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Film className="w-6 h-6 text-gray-600" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-red-500 font-semibold tracking-widest uppercase mb-1">선택된 영화</p>
+                  <h3 className="text-base font-bold text-white leading-snug">{selectedMovie.title}</h3>
+                  {selectedMovie.original_title !== selectedMovie.title && (
+                    <p className="text-xs text-gray-500 mb-2">{selectedMovie.original_title}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {selectedMovie.release_date && (
+                      <span className="flex items-center gap-1 text-xs text-gray-400">
+                        <Calendar className="w-3 h-3" />{selectedMovie.release_date.slice(0, 4)}
+                      </span>
+                    )}
+                    {selectedMovie.vote_average > 0 && (
+                      <span className="flex items-center gap-1 text-xs text-yellow-400">
+                        <Star className="w-3 h-3 fill-yellow-400" />{selectedMovie.vote_average.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                  {selectedMovie.genre_ids?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {selectedMovie.genre_ids.slice(0, 4).map((gid: number) => TMDB_GENRES[gid]).filter(Boolean).map((name: string) => (
+                        <span key={name} className="text-[10px] border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">{name}</span>
+                      ))}
                     </div>
-                  </button>
-                ))}
-                <div className="px-4 py-2 border-t border-gray-800">
-                  <p className="text-[10px] text-gray-600 text-center">TMDB 검색 결과</p>
+                  )}
+                  {selectedMovie.overview && (
+                    <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">{selectedMovie.overview}</p>
+                  )}
                 </div>
               </div>
-            )}
-            {showDropdown && searchResults.length === 0 && !isSearching && movieTitle.trim().length >= 2 && (
-              <div className="absolute top-full mt-1 left-0 right-0 bg-gray-900 border border-gray-700 rounded-2xl p-4 text-center shadow-2xl z-50">
-                <Film className="w-6 h-6 mx-auto mb-1.5 text-gray-600" />
-                <p className="text-xs text-gray-500">검색 결과가 없습니다</p>
-                <p className="text-[10px] text-gray-600 mt-1">직접 입력해서 진행할 수 있습니다</p>
+
+              {/* 감상 입력하기 버튼 */}
+              <div className="px-4 pb-4">
+                <button
+                  onClick={() => setStep(2)}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-white text-black rounded-xl font-bold text-sm hover:bg-gray-100 transition-all"
+                >
+                  <Pen className="w-4 h-4" />
+                  감상 입력하기
+                </button>
               </div>
-            )}
-          </div>
-          <button
-            onClick={() => { setShowDropdown(false); setStep(2); }}
-            disabled={!movieTitle.trim()}
-            className={cn(
-              "w-full py-3 rounded-xl font-bold text-sm transition-all",
-              movieTitle.trim() ? "bg-red-600 hover:bg-red-500 text-white" : "bg-gray-800 text-gray-600 cursor-not-allowed"
-            )}
-          >
-            다음 — 감상 입력하기
-          </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -378,7 +458,7 @@ export default function ReviewLabPage() {
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg w-fit">
             <Film className="w-4 h-4 text-red-500" />
             <span className="text-sm text-white font-medium">{movieTitle}</span>
-            <button onClick={() => setStep(1)} className="text-gray-600 hover:text-gray-400 text-xs ml-1">수정</button>
+            <button onClick={() => { setStep(1); setSelectedMovie(null); setShowDropdown(false); }} className="text-gray-600 hover:text-gray-400 text-xs ml-1">수정</button>
           </div>
 
           <div>

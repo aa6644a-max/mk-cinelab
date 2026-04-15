@@ -25,6 +25,8 @@ export async function GET(req: NextRequest) {
         poster_path: m.poster_path,
         release_date: m.release_date,
         vote_average: m.vote_average,
+        genre_ids: m.genre_ids ?? [],
+        overview: m.overview ?? "",
       }));
 
     return NextResponse.json({ results });
