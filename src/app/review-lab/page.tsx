@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Sparkles, Copy, Send,
@@ -95,6 +95,7 @@ function LoadingOverlay({ messages }: { messages: string[] }) {
 function ReviewLabInner() {
   const { user, loading } = useAuth();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [step, setStep] = useState(1);
   const [movieTitle, setMovieTitle] = useState("");
@@ -240,6 +241,7 @@ function ReviewLabInner() {
       const data = await res.json();
       if (data.success) {
         setSaved(true);
+        router.push(`/review/${data.id}`);
       } else {
         alert("저장에 실패했습니다. 다시 시도해 주세요.");
       }
