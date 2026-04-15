@@ -5,8 +5,8 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
-  Sparkles, Copy, Send, RotateCcw,
-  CheckCircle, Film, Tag, Pen,
+  Sparkles, Copy, Send,
+  CheckCircle, Film, Tag, Pen, Pencil,
   Search, X, Star, Calendar, ChevronRight
 } from "lucide-react";
 
@@ -114,6 +114,10 @@ function ReviewLabInner() {
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [nameError, setNameError] = useState("");
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedReview, setEditedReview] = useState("");
+  const [isUserEdited, setIsUserEdited] = useState(false);
 
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -227,10 +231,11 @@ function ReviewLabInner() {
           style: selectedStyle,
           content: review,
           matchScore,
+          isUserEdited,
           guestNickname: guestName,
-          guestEmail: guestEmail,  // 추가
-          userId: user?.id ?? null, // 추가
-}),
+          guestEmail: guestEmail,
+          userId: user?.id ?? null,
+        }),
       });
       const data = await res.json();
       if (data.success) {
@@ -293,6 +298,9 @@ function ReviewLabInner() {
     setMatchScore(0);
     setPoster(null);
     setSaved(false);
+    setIsEditing(false);
+    setEditedReview("");
+    setIsUserEdited(false);
   };
 
   return (
@@ -625,6 +633,7 @@ function ReviewLabInner() {
       {/* Step 4: 결과 */}
       {step === 4 && review && !isLoading && (
         <div ref={resultRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+          {/* 영화 + 메타 */}
           <div className="flex items-center gap-4 p-4 bg-gray-900 border border-gray-800 rounded-xl">
             {poster ? (
               <Image src={poster} alt={movieTitle} width={52} height={78} className="rounded-lg object-cover flex-shrink-0" />
@@ -637,6 +646,9 @@ function ReviewLabInner() {
               <h2 className="text-base font-bold text-white">{movieTitle}</h2>
               <div className="flex flex-wrap gap-1.5 mt-1.5">
                 <span className="text-[10px] border border-purple-700 text-purple-400 bg-purple-950/30 px-2 py-0.5 rounded-full">AI Assisted</span>
+                {isUserEdited && (
+                  <span className="text-[10px] border border-amber-700 text-amber-400 bg-amber-950/30 px-2 py-0.5 rounded-full">사용자 검수</span>
+                )}
                 <span className="text-[10px] border border-gray-700 text-gray-500 px-2 py-0.5 rounded-full">
                   {STYLES.find((s) => s.id === selectedStyle)?.label}
                 </span>
@@ -647,6 +659,7 @@ function ReviewLabInner() {
             </div>
           </div>
 
+          {/* 반영도 */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-500">감상 반영도</span>
@@ -661,88 +674,122 @@ function ReviewLabInner() {
             <p className="text-[11px] text-gray-600">입력하신 감상과 키워드를 바탕으로 AI가 다듬었습니다</p>
           </div>
 
-          <div className="bg-gray-900/80 border border-gray-700 rounded-2xl p-6">
-            <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">{review}</p>
-          </div>
+          {/* 리뷰 본문 / 수정 에디터 */}
+          {isEditing ? (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-gray-500">리뷰 수정 중</span>
+                <span className="text-xs text-gray-600">{editedReview.length}자</span>
+              </div>
+              <textarea
+                value={editedReview}
+                onChange={(e) => setEditedReview(e.target.value)}
+                rows={10}
+                autoFocus
+                className="w-full bg-gray-900 border border-red-700 rounded-2xl px-5 py-4 text-gray-200 text-sm leading-relaxed focus:outline-none focus:border-red-500 resize-none transition-colors"
+              />
+            </div>
+          ) : (
+            <div className="bg-gray-900/80 border border-gray-700 rounded-2xl p-6">
+              <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">{review}</p>
+            </div>
+          )}
 
+          {/* 비회원 발행자 정보 */}
+          {!user && !loading && !saved && (
+            <div className="space-y-2 p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
+              <p className="text-xs text-gray-400 font-medium mb-3">발행자 정보</p>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">
+                  닉네임 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={guestName}
+                  onChange={(e) => { setGuestName(e.target.value); setNameError(""); }}
+                  placeholder="표시될 닉네임 입력"
+                  maxLength={20}
+                  className={cn(
+                    "w-full bg-gray-800 border rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none transition-colors",
+                    nameError ? "border-red-600" : "border-gray-700 focus:border-red-600"
+                  )}
+                />
+                {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">
+                  이메일
+                  <span className="text-gray-600 ml-1">(선택 — 나중에 로그인하면 내 리뷰로 연결)</span>
+                </label>
+                <input
+                  type="email"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="example@email.com"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-600 transition-colors"
+                />
+              </div>
+              <p className="text-[11px] text-gray-600">
+                로그인 없이 발행 가능 · 이메일 입력 시 나중에 로그인하면 내 리뷰로 연결됩니다
+              </p>
+            </div>
+          )}
+
+          {/* 버튼 */}
           <div className="flex gap-3">
+            {/* 복사하기 */}
             <button
               onClick={handleCopy}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-gray-700 text-gray-300 hover:border-gray-500 text-sm transition-all flex-1 justify-center"
+              disabled={isEditing}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-700 text-gray-300 hover:border-gray-500 text-sm transition-all flex-1 justify-center disabled:opacity-40"
             >
               {copied
                 ? <><CheckCircle className="w-4 h-4 text-green-400" /><span className="text-green-400">복사됨!</span></>
                 : <><Copy className="w-4 h-4" />복사하기</>}
             </button>
-            <button
-              onClick={() => { setStep(3); setReview(""); }}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-gray-700 text-gray-300 hover:border-gray-500 text-sm transition-all flex-1 justify-center"
-            >
-              <RotateCcw className="w-4 h-4" />다시 생성
-            </button>
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-all flex-1 justify-center"
-            >
-              <Send className="w-4 h-4" />새 리뷰 작성
-            </button>
-          </div>
 
-          <div className="space-y-3">
-            {!user && !loading && !saved && (
-              <div className="space-y-2 p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
-                <p className="text-xs text-gray-400 font-medium mb-3">발행자 정보</p>
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">
-                    닉네임 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={guestName}
-                    onChange={(e) => { setGuestName(e.target.value); setNameError(""); }}
-                    placeholder="표시될 닉네임 입력"
-                    maxLength={20}
-                    className={cn(
-                      "w-full bg-gray-800 border rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none transition-colors",
-                      nameError ? "border-red-600" : "border-gray-700 focus:border-red-600"
-                    )}
-                  />
-                  {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">
-                    이메일
-                    <span className="text-gray-600 ml-1">(선택 — 나중에 로그인하면 내 리뷰로 연결)</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
-                    placeholder="example@email.com"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-600 transition-colors"
-                  />
-                </div>
-              </div>
+            {/* 수정하기 / 완료 */}
+            {!saved && (
+              <button
+                onClick={() => {
+                  if (isEditing) {
+                    if (editedReview.trim()) {
+                      setReview(editedReview.trim());
+                      setIsUserEdited(true);
+                    }
+                    setIsEditing(false);
+                  } else {
+                    setEditedReview(review);
+                    setIsEditing(true);
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-700 text-gray-300 hover:border-gray-500 text-sm transition-all flex-1 justify-center"
+              >
+                {isEditing
+                  ? <><CheckCircle className="w-4 h-4" />완료</>
+                  : <><Pencil className="w-4 h-4" />수정하기</>}
+              </button>
             )}
+
+            {/* 게시판 발행 */}
             <button
               onClick={handleSave}
-              disabled={isSaving || saved}
+              disabled={isSaving || saved || isEditing}
               className={cn(
-                "w-full py-3 rounded-xl text-sm font-bold border transition-all",
+                "flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-all flex-1 justify-center",
                 saved
-                  ? "border-green-700 text-green-400 bg-green-950/30"
-                  : isSaving
-                  ? "border-gray-700 text-gray-500 cursor-wait"
-                  : "border-gray-700 text-gray-400 hover:border-white hover:text-white"
+                  ? "bg-green-700 text-white"
+                  : isSaving || isEditing
+                  ? "bg-gray-700 text-gray-500 cursor-wait"
+                  : "bg-red-600 hover:bg-red-500 text-white"
               )}
             >
-              {saved ? "✓ 게시판에 발행됨" : isSaving ? "저장 중..." : "게시판에 발행하기"}
+              {saved
+                ? <><CheckCircle className="w-4 h-4" />발행됨</>
+                : isSaving
+                ? "저장 중..."
+                : <><Send className="w-4 h-4" />게시판 발행</>}
             </button>
-            {!user && !saved && (
-              <p className="text-[11px] text-gray-600 text-center">
-                로그인 없이 발행 가능 · 이메일 입력 시 나중에 로그인하면 내 리뷰로 연결됩니다
-              </p>
-            )}
           </div>
         </div>
       )}

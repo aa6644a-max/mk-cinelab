@@ -8,8 +8,9 @@ export async function POST(req: NextRequest) {
     const {
       movieTitle, moviePoster, userInput,
       inputKeywords, style, content, matchScore,
+      isUserEdited,
       guestNickname, guestEmail,
-      userId, // 클라이언트에서 user.id 전달
+      userId,
     } = body;
 
     if (!userId && !guestNickname?.trim()) {
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
       content,
       match_score: matchScore,
       is_ai_assisted: true,
-      is_user_edited: false,
+      is_user_edited: isUserEdited ?? false,
     };
 
     if (userId) {
