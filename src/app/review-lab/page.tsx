@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
@@ -92,7 +92,7 @@ function LoadingOverlay({ messages }: { messages: string[] }) {
   );
 }
 
-export default function ReviewLabPage() {
+function ReviewLabInner() {
   const { user, loading } = useAuth();
   const searchParams = useSearchParams();
 
@@ -747,5 +747,13 @@ export default function ReviewLabPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ReviewLabPage() {
+  return (
+    <Suspense>
+      <ReviewLabInner />
+    </Suspense>
   );
 }
