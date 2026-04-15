@@ -6,20 +6,35 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
 
+const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: currentYear - 1939 }, (_, i) => currentYear - i);
+const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+function getDays(year: number, month: number) {
+  if (!year || !month) return Array.from({ length: 31 }, (_, i) => i + 1);
+  return Array.from({ length: new Date(year, month, 0).getDate() }, (_, i) => i + 1);
+}
+
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
+  const [gender, setGender] = useState("");
+  const [birthYear, setBirthYear] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
+  const [birthDay, setBirthDay] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const days = getDays(Number(birthYear), Number(birthMonth));
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!email.trim() || !password.trim() || !nickname.trim()) {
-      setError("모든 항목을 입력해주세요");
+      setError("닉네임, 이메일, 비밀번호를 입력해주세요");
       return;
     }
     if (password.length < 6) {
@@ -30,6 +45,16 @@ export default function SignupPage() {
       setError("닉네임은 2자 이상이어야 합니다");
       return;
     }
+    if (!gender) {
+      setError("성별을 선택해주세요");
+      return;
+    }
+    if (!birthYear || !birthMonth || !birthDay) {
+      setError("생년월일을 선택해주세요");
+      return;
+    }
+
+    const birthDate = `${birthYear}-${String(birthMonth).padStart(2, "0")}-${String(birthDay).padStart(2, "0")}`;
 
     setIsLoading(true);
     try {
@@ -59,6 +84,8 @@ export default function SignupPage() {
             avatar_url: null,
             is_trusted: false,
             review_count: 0,
+            gender,
+            birth_date: birthDate,
           });
 
         if (profileError) {
@@ -76,7 +103,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Link href="/" className="text-white font-bold text-xl tracking-tight">
@@ -87,6 +114,7 @@ export default function SignupPage() {
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
+          {/* 닉네임 */}
           <div>
             <label className="text-xs text-gray-500 mb-1.5 block">닉네임</label>
             <input
@@ -99,6 +127,7 @@ export default function SignupPage() {
             />
           </div>
 
+          {/* 이메일 */}
           <div>
             <label className="text-xs text-gray-500 mb-1.5 block">이메일</label>
             <input
@@ -110,6 +139,7 @@ export default function SignupPage() {
             />
           </div>
 
+          {/* 비밀번호 */}
           <div>
             <label className="text-xs text-gray-500 mb-1.5 block">비밀번호</label>
             <div className="relative">
@@ -127,6 +157,69 @@ export default function SignupPage() {
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
+            </div>
+          </div>
+
+          {/* 성별 */}
+          <div>
+            <label className="text-xs text-gray-500 mb-1.5 block">성별</label>
+            <div className="flex gap-2">
+              {[
+                { value: "male", label: "남성" },
+                { value: "female", label: "여성" },
+                { value: "other", label: "기타" },
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setGender(value)}
+                  className={cn(
+                    "flex-1 py-2.5 rounded-xl text-sm font-medium transition-all border",
+                    gender === value
+                      ? "bg-red-600 border-red-600 text-white"
+                      : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 생년월일 */}
+          <div>
+            <label className="text-xs text-gray-500 mb-1.5 block">생년월일</label>
+            <div className="flex gap-2">
+              <select
+                value={birthYear}
+                onChange={(e) => { setBirthYear(e.target.value); setBirthDay(""); }}
+                className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-red-600 transition-colors appearance-none"
+              >
+                <option value="" disabled>년</option>
+                {YEARS.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+              <select
+                value={birthMonth}
+                onChange={(e) => { setBirthMonth(e.target.value); setBirthDay(""); }}
+                className="w-20 bg-gray-900 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-red-600 transition-colors appearance-none"
+              >
+                <option value="" disabled>월</option>
+                {MONTHS.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+              <select
+                value={birthDay}
+                onChange={(e) => setBirthDay(e.target.value)}
+                className="w-20 bg-gray-900 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-red-600 transition-colors appearance-none"
+              >
+                <option value="" disabled>일</option>
+                {days.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
             </div>
           </div>
 
