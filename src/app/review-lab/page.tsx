@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import {
   Sparkles, Copy, Send, RotateCcw,
@@ -118,18 +118,7 @@ export default function ReviewLabPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<any | null>(null);
 
-  const searchRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const toggleKeyword = (kw: string) => {
     setSelectedKeywords((prev) =>
@@ -289,7 +278,7 @@ export default function ReviewLabPage() {
       {step === 1 && (
         <div className="animate-in fade-in duration-300 space-y-4">
           {/* 검색 인풋 */}
-          <div ref={searchRef}>
+          <div>
             <label className="text-sm text-gray-400 mb-2 block">리뷰를 쓸 영화 제목을 입력하세요</label>
             <div className="flex gap-2">
               <div className={cn(
