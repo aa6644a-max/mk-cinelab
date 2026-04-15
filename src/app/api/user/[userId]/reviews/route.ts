@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase-server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function GET(
   _req: NextRequest,
@@ -7,7 +7,11 @@ export async function GET(
 ) {
   try {
     const { userId } = await params;
-    const supabase = await createServerSupabase();
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
 
     const [profileRes, reviewsRes] = await Promise.all([
       supabase

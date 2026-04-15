@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase-server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -15,10 +15,19 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "닉네임은 20자 이하여야 합니다" }, { status: 400 });
     }
 
-    const supabase = await createServerSupabase();
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      return NextResponse.json({ error: "서버 설정 오류" }, { status: 500 });
+    }
+
+    const adminClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
 
     // 닉네임 중복 확인
-    const { data: existing } = await supabase
+    const { data: existing } = await adminClient
       .from("profiles")
       .select("id")
       .eq("nickname", nickname.trim())
@@ -29,7 +38,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "이미 사용 중인 닉네임입니다" }, { status: 409 });
     }
 
-    const { error } = await supabase
+    const { error } = await adminClient
       .from("profiles")
       .update({ nickname: nickname.trim(), bio: bio?.trim() ?? null })
       .eq("id", userId);
