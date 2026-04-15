@@ -106,16 +106,39 @@ ${styleGuide[style] ?? styleGuide.critic}
 - 스포일러 없이 작성
 - 분량: sns 스타일은 200자 이내, 나머지는 300~500자
 
-[감상 반영도 채점 기준 — 0~100점]
-- 사용자 감상의 핵심 감정이 리뷰에 살아있는가 (40점)
-- 사용자가 언급한 장면·요소·표현이 반영됐는가 (35점)
-- 선택한 감정 키워드의 뉘앙스가 자연스럽게 녹아들었는가 (25점)
+[감상 반영도 채점 — 0~100점, 반드시 엄격하게 평가]
+채점 기준:
+- 사용자 원문의 핵심 감정·표현이 리뷰에 그대로 살아있는가 (40점)
+  · 사용자가 쓴 단어나 표현이 리뷰에 직접 등장하면 +점수
+  · 일반적인 영화 칭찬으로 대체됐으면 감점
+- 사용자가 언급한 구체적 장면·요소가 반영됐는가 (35점)
+  · 사용자 감상이 짧거나 모호하면 반영하기 어려우므로 감점
+- 선택한 감정 키워드가 리뷰에 녹아들었는가 (25점)
+  · 키워드를 선택하지 않았으면 이 항목은 0점 처리
+
+엄격한 채점 지침:
+- 대부분의 리뷰는 65~80점대가 정상
+- 사용자 감상이 1~2줄로 짧으면 반영 한계가 있으므로 최대 75점
+- 85점 이상은 사용자 표현이 리뷰에 거의 그대로 살아있을 때만 가능
+- 95점 이상은 극히 드물며 사용자 감상이 매우 구체적이고 리뷰에 완벽히 반영됐을 때만 부여
+- 자기 자신이 쓴 리뷰이므로 후하게 점수를 주는 경향을 의식적으로 배제할 것
 
 [응답 형식 — 반드시 아래 JSON만 반환, 다른 텍스트 없음]
 {"review":"리뷰 텍스트","score":숫자}
 `;
 
   const raw = await generateWithRetry(prompt);
+
+  // AI 점수 보정 함수: 키워드 반영률과 블렌딩
+  const calcFinalScore = (aiScore: number, reviewText: string): number => {
+    const matched = keywords.filter((kw) => reviewText.includes(kw.replace("#", ""))).length;
+    const total = keywords.length;
+    const keywordRate = total === 0 ? 0.5 : matched / total; // 키워드 없으면 중립 0.5
+
+    // AI 점수 70% + 키워드 반영률 30% 블렌딩
+    const blended = aiScore * 0.7 + (55 + keywordRate * 35) * 0.3;
+    return Math.min(Math.max(Math.round(blended), 0), 99);
+  };
 
   // JSON 파싱 시도
   try {
@@ -129,9 +152,9 @@ ${styleGuide[style] ?? styleGuide.critic}
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);
       const review = String(parsed.review ?? "").trim();
-      const score = Math.min(Math.max(Math.round(Number(parsed.score)), 0), 100);
-      if (review && !isNaN(score)) {
-        return { review, score };
+      const rawScore = Math.min(Math.max(Math.round(Number(parsed.score)), 0), 100);
+      if (review && !isNaN(rawScore)) {
+        return { review, score: calcFinalScore(rawScore, review) };
       }
     }
   } catch {
@@ -145,8 +168,8 @@ ${styleGuide[style] ?? styleGuide.critic}
     const review = reviewMatch
       ? reviewMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"')
       : raw.replace(/\{[\s\S]*\}/, "").trim() || raw.trim();
-    const score = Math.min(Math.max(parseInt(scoreMatch[1]), 0), 100);
-    if (review) return { review, score };
+    const rawScore = Math.min(Math.max(parseInt(scoreMatch[1]), 0), 100);
+    if (review) return { review, score: calcFinalScore(rawScore, review) };
   }
 
   // 폴백 2: JSON 파싱 완전 실패 → 텍스트 전체를 리뷰로, 키워드 방식으로 점수 계산
@@ -154,8 +177,8 @@ ${styleGuide[style] ?? styleGuide.critic}
   const matchedCount = keywords.filter((kw) => review.includes(kw.replace("#", ""))).length;
   const total = keywords.length;
   const score = total === 0
-    ? 91
-    : Math.min(Math.round(70 + (matchedCount / total) * 25 + Math.random() * 5), 99);
+    ? 72
+    : Math.min(Math.round(60 + (matchedCount / total) * 30 + Math.random() * 5), 92);
 
   return { review, score };
 }
