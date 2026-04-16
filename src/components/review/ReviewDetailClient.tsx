@@ -193,17 +193,22 @@ export default function ReviewDetailClient({
       </div>
 
       {/* 작성자 정보 + 수정/삭제 버튼 */}
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          {profile?.avatar_url ? (
-            <Image src={profile.avatar_url} alt={profile.nickname} width={36} height={36} className="rounded-full" />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-gray-700 flex items-center justify-center text-sm text-gray-400">
-              {(profile?.nickname ?? "?")[0]}
-            </div>
-          )}
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-start gap-3 min-w-0">
+          {/* 아바타 */}
+          <div className="flex-shrink-0 mt-0.5">
+            {profile?.avatar_url ? (
+              <Image src={profile.avatar_url} alt={profile.nickname} width={36} height={36} className="rounded-full" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-gray-700 flex items-center justify-center text-sm text-gray-400">
+                {(profile?.nickname ?? "?")[0]}
+              </div>
+            )}
+          </div>
+          {/* 텍스트 정보 */}
+          <div className="min-w-0">
+            {/* 닉네임 */}
+            <div className="mb-1">
               {profile?.id ? (
                 <Link
                   href={`/user/${profile.id}`}
@@ -216,24 +221,30 @@ export default function ReviewDetailClient({
                   {review.guest_nickname ?? "익명"}
                 </span>
               )}
-              {profile?.is_trusted && (
-                <span className="flex items-center gap-0.5 text-[10px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
-                  <ShieldCheck className="w-2 h-2" /> 신뢰 마크
-                </span>
-              )}
-              {review.is_ai_assisted && (
-                <span className="flex items-center gap-0.5 text-[10px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
-                  <Sparkles className="w-2 h-2" /> AI Assisted
-                </span>
-              )}
-              {isUserEdited && (
-                <span className="flex items-center gap-0.5 text-[10px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
-                  <PenLine className="w-2 h-2" /> 사용자 검수
-                </span>
-              )}
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-gray-600 mt-0.5">
-              <Clock className="w-2.5 h-2.5" />
+            {/* 배지 */}
+            {(profile?.is_trusted || review.is_ai_assisted || isUserEdited) && (
+              <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                {profile?.is_trusted && (
+                  <span className="flex items-center gap-0.5 text-[10px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
+                    <ShieldCheck className="w-2 h-2" /> 신뢰 마크
+                  </span>
+                )}
+                {review.is_ai_assisted && (
+                  <span className="flex items-center gap-0.5 text-[10px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
+                    <Sparkles className="w-2 h-2" /> AI Assisted
+                  </span>
+                )}
+                {isUserEdited && (
+                  <span className="flex items-center gap-0.5 text-[10px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
+                    <PenLine className="w-2 h-2" /> 사용자 검수
+                  </span>
+                )}
+              </div>
+            )}
+            {/* 시간 · 스타일 */}
+            <div className="flex items-center gap-1 text-[10px] text-gray-600">
+              <Clock className="w-2.5 h-2.5 flex-shrink-0" />
               {getTimeAgo(review.created_at)}
               <span className="mx-1">·</span>
               {STYLE_LABELS[review.style] ?? review.style}
