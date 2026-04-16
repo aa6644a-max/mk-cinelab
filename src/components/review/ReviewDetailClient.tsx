@@ -79,6 +79,9 @@ export default function ReviewDetailClient({
     if (!editContent.trim()) return;
     setIsSaving(true);
     try {
+      const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
+      const contentChanged = normalize(editContent) !== normalize(currentContent);
+
       const res = await fetch(`/api/review/${review.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -86,12 +89,13 @@ export default function ReviewDetailClient({
           content: editContent,
           userId: user?.id ?? null,
           isAdmin,
+          isUserEdited: contentChanged || isUserEdited,
         }),
       });
       const data = await res.json();
       if (data.success) {
+        if (contentChanged) setIsUserEdited(true);
         setCurrentContent(editContent.trim());
-        setIsUserEdited(true);
         setIsEditing(false);
       }
     } catch (err) {

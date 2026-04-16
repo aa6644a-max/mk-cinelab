@@ -35,7 +35,7 @@ export async function DELETE(req: NextRequest, { params }: Props) {
 export async function PATCH(req: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
-    const { content, userId, isAdmin } = await req.json();
+    const { content, userId, isAdmin, isUserEdited } = await req.json();
 
     if (!content?.trim()) {
       return NextResponse.json({ error: "내용을 입력해주세요" }, { status: 400 });
@@ -47,9 +47,12 @@ export async function PATCH(req: NextRequest, { params }: Props) {
 
     const supabase = await createServerSupabase();
 
+    const updateData: Record<string, unknown> = { content: content.trim() };
+    if (isUserEdited === true) updateData.is_user_edited = true;
+
     let query = supabase
       .from("reviews")
-      .update({ content: content.trim(), is_user_edited: true })
+      .update(updateData)
       .eq("id", id);
 
     // 관리자가 아닌 경우 본인 리뷰만 수정 가능
