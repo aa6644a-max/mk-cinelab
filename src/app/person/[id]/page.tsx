@@ -157,26 +157,26 @@ export default function PersonPage() {
       </button>
 
       {/* 인물 헤더 */}
-      <div className="flex gap-6 mb-8">
+      <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 mb-8">
         {/* 프로필 사진 */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex sm:block justify-center">
           {person.profile_path ? (
             <Image
               src={`https://image.tmdb.org/t/p/w300${person.profile_path}`}
               alt={person.name}
               width={140}
               height={196}
-              className="rounded-2xl object-cover shadow-2xl"
+              className="rounded-2xl object-cover shadow-2xl w-28 sm:w-[140px]"
             />
           ) : (
-            <div className="w-[140px] h-[196px] bg-gray-800 rounded-2xl flex items-center justify-center">
+            <div className="w-28 h-40 sm:w-[140px] sm:h-[196px] bg-gray-800 rounded-2xl flex items-center justify-center">
               <User className="w-12 h-12 text-gray-600" />
             </div>
           )}
         </div>
 
         {/* 인물 정보 */}
-        <div className="flex-1 min-w-0 pt-1">
+        <div className="flex-1 min-w-0 sm:pt-1">
           {/* 직군 배지 */}
           {person.known_for_department && (
             <span className="inline-block text-[10px] text-red-400 border border-red-800 px-2 py-0.5 rounded-full mb-2">
@@ -216,7 +216,7 @@ export default function PersonPage() {
       </div>
 
       {/* 필모그래피 탭 + 정렬 */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-5 gap-3">
         <div className="flex gap-1 bg-gray-900/60 border border-gray-800 rounded-xl p-1">
           {hasCast && (
             <button
@@ -269,7 +269,7 @@ export default function PersonPage() {
           <p className="text-sm">작품 정보가 없습니다</p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {sorted.map((movie: any) => (
             <MovieCard
               key={movie.id + (movie.character ?? movie.job ?? "")}

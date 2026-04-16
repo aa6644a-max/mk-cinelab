@@ -284,24 +284,24 @@ export default function BoardClient() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       {/* 헤더 */}
-      <div className="flex items-center justify-between mb-5">
-        <div>
+      <div className="flex items-center justify-between mb-5 gap-3">
+        <div className="min-w-0">
           <h1 className="text-xl font-bold text-white">리뷰 보드</h1>
           <p className="text-xs text-gray-500 mt-0.5">총 {total}개의 리뷰</p>
         </div>
         {/* 뷰 토글 + 정렬 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <div className="flex gap-1 border border-gray-700 rounded-lg p-0.5">
             <button
               onClick={() => setViewMode("card")}
-              className={cn("p-1.5 rounded-md transition-colors", viewMode === "card" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300")}
+              className={cn("p-2 rounded-md transition-colors", viewMode === "card" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300")}
               title="카드형"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={cn("p-1.5 rounded-md transition-colors", viewMode === "list" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300")}
+              className={cn("p-2 rounded-md transition-colors", viewMode === "list" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300")}
               title="리스트형"
             >
               <List className="w-3.5 h-3.5" />
@@ -312,7 +312,7 @@ export default function BoardClient() {
               key={s.value}
               onClick={() => setSort(s.value)}
               className={cn(
-                "text-xs px-3 py-1.5 rounded-lg border transition-colors",
+                "text-xs px-3 py-2 rounded-lg border transition-colors whitespace-nowrap",
                 sort === s.value
                   ? "bg-white text-black border-white"
                   : "border-gray-700 text-gray-400 hover:border-gray-500"
@@ -472,7 +472,7 @@ export default function BoardClient() {
           <button
             onClick={() => changePage(page - 1)}
             disabled={page <= 1}
-            className="p-2 rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -487,7 +487,7 @@ export default function BoardClient() {
               }, [])
               .map((p, i) =>
                 p === "..." ? (
-                  <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-gray-600 text-xs">
+                  <span key={`ellipsis-${i}`} className="w-10 h-10 flex items-center justify-center text-gray-600 text-xs">
                     ...
                   </span>
                 ) : (
@@ -495,7 +495,7 @@ export default function BoardClient() {
                     key={p}
                     onClick={() => changePage(p as number)}
                     className={cn(
-                      "w-8 h-8 rounded-lg text-xs font-medium transition-colors",
+                      "w-10 h-10 rounded-lg text-sm font-medium transition-colors",
                       page === p
                         ? "bg-red-600 text-white"
                         : "border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white"
@@ -510,7 +510,7 @@ export default function BoardClient() {
           <button
             onClick={() => changePage(page + 1)}
             disabled={page >= totalPages}
-            className="p-2 rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

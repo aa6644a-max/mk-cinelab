@@ -120,7 +120,7 @@ export default function SearchBar() {
 
       {/* 드롭다운 결과 */}
       {isOpen && results.length > 0 && (
-        <div className="absolute top-full mt-2 right-0 w-72 bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl z-40">
+        <div className="absolute top-full mt-2 right-0 w-[min(288px,calc(100vw-2rem))] bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl z-40">
           {results.map((movie, i) => (
             <button
               key={movie.id}
@@ -180,7 +180,7 @@ export default function SearchBar() {
 
       {/* 결과 없음 */}
       {isOpen && results.length === 0 && !isLoading && query.trim().length >= 2 && (
-        <div className="absolute top-full mt-2 right-0 w-64 bg-gray-900 border border-gray-700 rounded-2xl p-4 text-center shadow-2xl z-40">
+        <div className="absolute top-full mt-2 right-0 w-[min(256px,calc(100vw-2rem))] bg-gray-900 border border-gray-700 rounded-2xl p-4 text-center shadow-2xl z-40">
           <Film className="w-6 h-6 mx-auto mb-1.5 text-gray-600" />
           <p className="text-xs text-gray-500">검색 결과가 없습니다</p>
         </div>

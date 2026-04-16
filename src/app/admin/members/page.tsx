@@ -410,9 +410,73 @@ export default function AdminMembersPage() {
             />
           </div>
 
-          {/* 회원 테이블 */}
+          {/* 회원 목록 — 모바일: 카드 / 데스크탑: 테이블 */}
           <div className="bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden">
-            <div className="overflow-x-auto">
+
+            {/* 모바일 카드 (md 미만) */}
+            <div className="md:hidden divide-y divide-gray-800">
+              {members.length === 0 ? (
+                <p className="px-4 py-12 text-center text-gray-600 text-sm">가입된 회원이 없습니다</p>
+              ) : members.map((member) => (
+                <div key={member.id} className="p-4 space-y-3">
+                  {/* 상단: 닉네임 + 배지 + 액션 */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm font-semibold text-white">{member.nickname}</span>
+                        {member.is_trusted && <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />}
+                        {member.gender && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${
+                            member.gender === "male" ? "border-blue-800 text-blue-400" : "border-pink-800 text-pink-400"
+                          }`}>
+                            {GENDER_LABELS[member.gender]}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">{member.email}</p>
+                    </div>
+                    {/* 액션 버튼 */}
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button
+                        onClick={() => handleTrustToggle(member)}
+                        disabled={trustLoading === member.id}
+                        className={`p-2 rounded-lg transition-colors ${
+                          member.is_trusted
+                            ? "bg-teal-900/50 text-teal-400"
+                            : "bg-gray-800 text-gray-600 hover:text-teal-400 hover:bg-teal-900/30"
+                        } disabled:opacity-50`}
+                        title={member.is_trusted ? "신뢰 마크 해제" : "신뢰 마크 부여"}
+                      >
+                        {member.is_trusted ? <Check className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => setDetailMember(member)}
+                        className="flex items-center gap-1 text-xs text-gray-400 border border-gray-700 px-3 py-2 rounded-lg hover:border-gray-500 hover:text-white transition-colors"
+                      >
+                        상세 <ChevronRight className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(member)}
+                        className="p-2 rounded-lg text-gray-600 border border-gray-800 hover:border-red-700 hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  {/* 하단: 메타 정보 */}
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span>{calcAge(member.birth_date)}</span>
+                    <span>·</span>
+                    <span>리뷰 {member.review_count}개</span>
+                    <span>·</span>
+                    <span>가입 {formatDate(member.joined_at)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 데스크탑 테이블 (md 이상) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-800 text-left">
@@ -444,9 +508,7 @@ export default function AdminMembersPage() {
                       <td className="px-4 py-3">
                         {member.gender ? (
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${
-                            member.gender === "male"
-                              ? "border-blue-800 text-blue-400"
-                              : "border-pink-800 text-pink-400"
+                            member.gender === "male" ? "border-blue-800 text-blue-400" : "border-pink-800 text-pink-400"
                           }`}>
                             {GENDER_LABELS[member.gender]}
                           </span>
@@ -457,8 +519,6 @@ export default function AdminMembersPage() {
                       <td className="px-4 py-3 text-gray-300 text-sm">{calcAge(member.birth_date)}</td>
                       <td className="px-4 py-3 text-gray-400 text-sm text-center">{member.review_count}</td>
                       <td className="px-4 py-3 text-gray-500 text-xs">{formatDate(member.joined_at)}</td>
-
-                      {/* 신뢰 마크 토글 */}
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => handleTrustToggle(member)}
@@ -470,14 +530,9 @@ export default function AdminMembersPage() {
                           } disabled:opacity-50`}
                           title={member.is_trusted ? "신뢰 마크 해제" : "신뢰 마크 부여"}
                         >
-                          {member.is_trusted
-                            ? <Check className="w-3.5 h-3.5" />
-                            : <ShieldCheck className="w-3.5 h-3.5" />
-                          }
+                          {member.is_trusted ? <Check className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
                         </button>
                       </td>
-
-                      {/* 상세 + 탈퇴 */}
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
@@ -489,7 +544,6 @@ export default function AdminMembersPage() {
                           <button
                             onClick={() => setDeleteTarget(member)}
                             className="p-1.5 rounded-lg text-gray-600 border border-gray-800 hover:border-red-700 hover:text-red-400 transition-colors"
-                            title="강제 탈퇴"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -499,9 +553,7 @@ export default function AdminMembersPage() {
                   ))}
                   {members.length === 0 && (
                     <tr>
-                      <td colSpan={8} className="px-4 py-12 text-center text-gray-600 text-sm">
-                        가입된 회원이 없습니다
-                      </td>
+                      <td colSpan={8} className="px-4 py-12 text-center text-gray-600 text-sm">가입된 회원이 없습니다</td>
                     </tr>
                   )}
                 </tbody>
