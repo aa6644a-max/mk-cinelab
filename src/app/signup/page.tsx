@@ -27,6 +27,7 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [genderError, setGenderError] = useState(false);
+  const [birthError, setBirthError] = useState(false);
 
   const days = getDays(Number(birthYear), Number(birthMonth));
 
@@ -53,9 +54,11 @@ export default function SignupPage() {
     }
     setGenderError(false);
     if (!birthYear || !birthMonth || !birthDay) {
+      setBirthError(true);
       setError("생년월일을 선택해주세요");
       return;
     }
+    setBirthError(false);
 
     const birthDate = `${birthYear}-${String(birthMonth).padStart(2, "0")}-${String(birthDay).padStart(2, "0")}`;
 
@@ -119,7 +122,7 @@ export default function SignupPage() {
         <form onSubmit={handleSignup} className="space-y-4">
           {/* 닉네임 */}
           <div>
-            <label className="text-xs text-gray-500 mb-1.5 block">닉네임</label>
+            <label className="text-xs text-gray-500 mb-1.5 block">닉네임 <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={nickname}
@@ -132,7 +135,7 @@ export default function SignupPage() {
 
           {/* 이메일 */}
           <div>
-            <label className="text-xs text-gray-500 mb-1.5 block">이메일</label>
+            <label className="text-xs text-gray-500 mb-1.5 block">이메일 <span className="text-red-500">*</span></label>
             <input
               type="email"
               value={email}
@@ -144,7 +147,7 @@ export default function SignupPage() {
 
           {/* 비밀번호 */}
           <div>
-            <label className="text-xs text-gray-500 mb-1.5 block">비밀번호</label>
+            <label className="text-xs text-gray-500 mb-1.5 block">비밀번호 <span className="text-red-500">*</span></label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -197,12 +200,15 @@ export default function SignupPage() {
 
           {/* 생년월일 */}
           <div>
-            <label className="text-xs text-gray-500 mb-1.5 block">생년월일</label>
+            <label className="text-xs text-gray-500 mb-1.5 block">생년월일 <span className="text-red-500">*</span></label>
             <div className="flex gap-2">
               <select
                 value={birthYear}
-                onChange={(e) => { setBirthYear(e.target.value); setBirthDay(""); }}
-                className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-red-600 transition-colors appearance-none"
+                onChange={(e) => { setBirthYear(e.target.value); setBirthDay(""); setBirthError(false); }}
+                className={cn(
+                  "flex-1 bg-gray-900 rounded-xl px-3 py-3 text-sm text-white focus:outline-none transition-colors appearance-none border",
+                  birthError && !birthYear ? "border-red-700" : "border-gray-700 focus:border-red-600"
+                )}
               >
                 <option value="" disabled>년</option>
                 {YEARS.map((y) => (
@@ -211,8 +217,11 @@ export default function SignupPage() {
               </select>
               <select
                 value={birthMonth}
-                onChange={(e) => { setBirthMonth(e.target.value); setBirthDay(""); }}
-                className="w-20 bg-gray-900 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-red-600 transition-colors appearance-none"
+                onChange={(e) => { setBirthMonth(e.target.value); setBirthDay(""); setBirthError(false); }}
+                className={cn(
+                  "w-20 bg-gray-900 rounded-xl px-3 py-3 text-sm text-white focus:outline-none transition-colors appearance-none border",
+                  birthError && !birthMonth ? "border-red-700" : "border-gray-700 focus:border-red-600"
+                )}
               >
                 <option value="" disabled>월</option>
                 {MONTHS.map((m) => (
@@ -221,8 +230,11 @@ export default function SignupPage() {
               </select>
               <select
                 value={birthDay}
-                onChange={(e) => setBirthDay(e.target.value)}
-                className="w-20 bg-gray-900 border border-gray-700 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-red-600 transition-colors appearance-none"
+                onChange={(e) => { setBirthDay(e.target.value); setBirthError(false); }}
+                className={cn(
+                  "w-20 bg-gray-900 rounded-xl px-3 py-3 text-sm text-white focus:outline-none transition-colors appearance-none border",
+                  birthError && !birthDay ? "border-red-700" : "border-gray-700 focus:border-red-600"
+                )}
               >
                 <option value="" disabled>일</option>
                 {days.map((d) => (
@@ -230,6 +242,9 @@ export default function SignupPage() {
                 ))}
               </select>
             </div>
+            {birthError && (
+              <p className="text-xs text-red-400 mt-1.5">생년월일을 모두 선택해주세요</p>
+            )}
           </div>
 
           {error && (
