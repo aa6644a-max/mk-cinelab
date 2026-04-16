@@ -26,6 +26,7 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [genderError, setGenderError] = useState(false);
 
   const days = getDays(Number(birthYear), Number(birthMonth));
 
@@ -46,9 +47,11 @@ export default function SignupPage() {
       return;
     }
     if (!gender) {
+      setGenderError(true);
       setError("성별을 선택해주세요");
       return;
     }
+    setGenderError(false);
     if (!birthYear || !birthMonth || !birthDay) {
       setError("생년월일을 선택해주세요");
       return;
@@ -162,7 +165,9 @@ export default function SignupPage() {
 
           {/* 성별 */}
           <div>
-            <label className="text-xs text-gray-500 mb-1.5 block">성별</label>
+            <label className="text-xs text-gray-500 mb-1.5 block">
+              성별 <span className="text-red-500">*</span>
+            </label>
             <div className="flex gap-2">
               {[
                 { value: "male", label: "남성" },
@@ -171,11 +176,13 @@ export default function SignupPage() {
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setGender(value)}
+                  onClick={() => { setGender(value); setGenderError(false); }}
                   className={cn(
                     "flex-1 py-2.5 rounded-xl text-sm font-medium transition-all border",
                     gender === value
                       ? "bg-red-600 border-red-600 text-white"
+                      : genderError
+                      ? "bg-gray-900 border-red-700 text-gray-400"
                       : "bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500"
                   )}
                 >
@@ -183,6 +190,9 @@ export default function SignupPage() {
                 </button>
               ))}
             </div>
+            {genderError && (
+              <p className="text-xs text-red-400 mt-1.5">성별을 선택해주세요</p>
+            )}
           </div>
 
           {/* 생년월일 */}
