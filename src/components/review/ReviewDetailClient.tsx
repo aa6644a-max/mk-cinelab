@@ -9,6 +9,7 @@ import {
   ArrowLeft, ShieldCheck, Sparkles, PenLine, Clock,
   Film, Calendar, Timer, Tag, Pencil, Trash2, Check, X,
 } from "lucide-react";
+import { ScoreInfoPopover } from "@/components/review/ScoreInfoPopover";
 
 const ADMIN_EMAIL = "aa6644a@gmail.com";
 
@@ -284,7 +285,10 @@ export default function ReviewDetailClient({
       {/* 감상 반영도 */}
       <div className="space-y-1.5 mb-6">
         <div className="flex justify-between items-center">
-          <span className="text-xs text-gray-500">감상 반영도</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-gray-500">감상 반영도</span>
+            <ScoreInfoPopover />
+          </div>
           <span className="text-xs font-bold text-red-400">{review.match_score}%</span>
         </div>
         <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">

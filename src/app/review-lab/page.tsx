@@ -7,8 +7,9 @@ import Image from "next/image";
 import {
   Sparkles, Copy, Send,
   CheckCircle, Film, Tag, Pen, Pencil,
-  Search, X, Star, Calendar, ChevronRight
+  Search, X, Star, Calendar, ChevronRight, HelpCircle
 } from "lucide-react";
+import { ScoreInfoContent } from "@/components/review/ScoreInfoPopover";
 
 const TMDB_GENRES: Record<number, string> = {
   28: "액션", 12: "어드벤처", 16: "애니메이션", 35: "코미디", 80: "범죄",
@@ -119,6 +120,7 @@ function ReviewLabInner() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedReview, setEditedReview] = useState("");
   const [isUserEdited, setIsUserEdited] = useState(false);
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
 
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -568,6 +570,28 @@ function ReviewLabInner() {
             )}
           </div>
 
+          {/* 감상 반영도 힌트 */}
+          <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-4 space-y-2">
+            <p className="text-xs font-medium text-gray-400 flex items-center gap-1.5">
+              <HelpCircle className="w-3.5 h-3.5 text-red-500" />
+              감상 반영도를 높이려면
+            </p>
+            <ul className="space-y-1.5 text-xs text-gray-500 leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-red-500 mt-0.5 flex-shrink-0">·</span>
+                <span><span className="text-gray-300">구체적인 장면·감정을 적어주세요</span> — "좋았다"보다 "엔딩 장면에서 소름 돋았다"가 훨씬 잘 반영됩니다</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-red-500 mt-0.5 flex-shrink-0">·</span>
+                <span><span className="text-gray-300">감정 키워드를 선택하면 가산점</span> — 선택한 키워드가 리뷰에 실제로 녹아들면 점수가 올라갑니다</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-red-500 mt-0.5 flex-shrink-0">·</span>
+                <span>평균 점수대: <span className="text-gray-300">짧은 감상 65~75점 · 구체적인 감상 76~85점 · 키워드까지 풍부하면 86점+</span></span>
+              </li>
+            </ul>
+          </div>
+
           <div className="flex gap-3">
             <button onClick={() => setStep(1)} className="px-5 py-3 rounded-xl border border-gray-700 text-gray-400 hover:text-white text-sm transition-colors">이전</button>
             <button
@@ -664,7 +688,29 @@ function ReviewLabInner() {
           {/* 반영도 */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">감상 반영도</span>
+              <div className="flex items-center gap-1.5 relative">
+                <span className="text-xs text-gray-500">감상 반영도</span>
+                <button
+                  onClick={() => setShowScoreInfo(!showScoreInfo)}
+                  className="text-gray-600 hover:text-gray-300 transition-colors"
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                </button>
+                {showScoreInfo && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowScoreInfo(false)} />
+                    <div className="absolute top-6 left-0 z-20 w-72 bg-gray-900 border border-gray-700 rounded-xl p-4 shadow-2xl">
+                      <ScoreInfoContent />
+                      <button
+                        onClick={() => setShowScoreInfo(false)}
+                        className="absolute top-3 right-3 text-gray-600 hover:text-gray-300"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
               <span className="text-xs font-bold text-red-400">{matchScore}%</span>
             </div>
             <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
@@ -673,7 +719,7 @@ function ReviewLabInner() {
                 style={{ width: matchScore + "%" }}
               />
             </div>
-            <p className="text-[11px] text-gray-600">입력하신 감상과 키워드를 바탕으로 AI가 다듬었습니다</p>
+            <p className="text-[11px] text-gray-600">입력하신 감상과 키워드를 바탕으로 AI가 채점했습니다</p>
           </div>
 
           {/* 리뷰 본문 / 수정 에디터 */}
