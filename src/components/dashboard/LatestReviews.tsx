@@ -149,15 +149,15 @@ export default function LatestReviews() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="p-1.5 rounded-lg border border-gray-800 text-gray-500 hover:border-gray-600 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-800 text-gray-500 hover:border-gray-600 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
+            <ChevronLeft className="w-4 h-4" />
           </button>
           {Array.from({ length: totalPages }).map((_, i) => {
             const p = i + 1;
             if (totalPages > 7 && Math.abs(p - page) > 2 && p !== 1 && p !== totalPages) {
               if (p === page - 3 || p === page + 3) {
-                return <span key={p} className="text-xs text-gray-600">...</span>;
+                return <span key={p} className="w-10 h-10 flex items-center justify-center text-xs text-gray-600">...</span>;
               }
               return null;
             }
@@ -166,7 +166,7 @@ export default function LatestReviews() {
                 key={p}
                 onClick={() => setPage(p)}
                 className={cn(
-                  "w-7 h-7 rounded-lg text-xs font-medium transition-colors",
+                  "w-10 h-10 rounded-lg text-sm font-medium transition-colors",
                   page === p
                     ? "bg-white text-black"
                     : "border border-gray-800 text-gray-500 hover:border-gray-600 hover:text-white"
@@ -179,9 +179,9 @@ export default function LatestReviews() {
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="p-1.5 rounded-lg border border-gray-800 text-gray-500 hover:border-gray-600 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-800 text-gray-500 hover:border-gray-600 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}

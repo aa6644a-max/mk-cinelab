@@ -5,12 +5,12 @@ export default function CurationBanner() {
   return (
     <section>
       <div className="border border-gray-800 rounded-2xl p-6 bg-gradient-to-r from-gray-900 to-black hover:border-gray-700 transition-all group">
-        <div className="flex items-center justify-between gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
           <div className="flex-1">
             <p className="text-xs font-semibold text-red-500 tracking-widest mb-2 uppercase">
               AI 취향 큐레이션
             </p>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
               오늘 어떤 무드의 영화가 당기시나요?
             </h3>
             <p className="text-sm text-gray-400 mb-4">
@@ -33,8 +33,8 @@ export default function CurationBanner() {
             </div>
           </div>
 
-          <Link href="/recommend">
-            <button className="flex items-center gap-2 bg-white text-black px-5 py-3 rounded-xl font-bold text-sm hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] whitespace-nowrap">
+          <Link href="/recommend" className="sm:flex-shrink-0">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black px-5 py-3 rounded-xl font-bold text-sm hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]">
               <Sparkles className="w-4 h-4" />
               시작하기
             </button>

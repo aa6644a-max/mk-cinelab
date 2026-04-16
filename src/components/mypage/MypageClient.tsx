@@ -177,16 +177,16 @@ function MyReviewCard({
                 <PenLine className="w-2 h-2" /> 검수
               </span>
             )}
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-1">
               <button
                 onClick={(e) => { e.stopPropagation(); router.push(`/review/${review.id}`); }}
-                className="text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
+                className="text-xs text-gray-500 hover:text-gray-300 transition-colors px-2 py-1"
               >
                 수정
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(true); }}
-                className="text-[10px] text-gray-500 hover:text-red-400 transition-colors"
+                className="text-xs text-gray-500 hover:text-red-400 transition-colors px-2 py-1"
               >
                 삭제
               </button>
@@ -260,46 +260,48 @@ export default function MypageClient({
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="flex items-center gap-5 p-5 bg-gray-900/60 border border-gray-800 rounded-2xl mb-6">
-        {avatarUrl ? (
-          <Image src={avatarUrl} alt={nickname} width={64} height={64} className="rounded-full flex-shrink-0" />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-2xl font-black text-white flex-shrink-0">
-            {nickname[0].toUpperCase()}
-          </div>
-        )}
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-lg font-bold text-white">{nickname}</h1>
-            <Link href="/settings" className="ml-auto text-gray-500 hover:text-gray-300 transition-colors" title="계정 설정">
-              <Settings className="w-4 h-4" />
-            </Link>
+      <div className="p-5 bg-gray-900/60 border border-gray-800 rounded-2xl mb-6">
+        {/* 프로필 상단 */}
+        <div className="flex items-center gap-4 mb-4">
+          {avatarUrl ? (
+            <Image src={avatarUrl} alt={nickname} width={56} height={56} className="rounded-full flex-shrink-0" />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-xl font-black text-white flex-shrink-0">
+              {nickname[0].toUpperCase()}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-bold text-white truncate">{nickname}</h1>
+              <Link href="/settings" className="flex-shrink-0 text-gray-500 hover:text-gray-300 transition-colors p-1" title="계정 설정">
+                <Settings className="w-4 h-4" />
+              </Link>
+            </div>
+            <p className="text-xs text-gray-500 truncate">{user.email}</p>
             {profile?.is_trusted ? (
-              <span className="flex items-center gap-1 text-[10px] border border-teal-700 text-teal-400 bg-teal-950/30 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-[10px] border border-teal-700 text-teal-400 bg-teal-950/30 px-2 py-0.5 rounded-full mt-1">
                 <ShieldCheck className="w-2.5 h-2.5" /> 신뢰 마크
               </span>
             ) : (
-              <span className="text-[10px] text-gray-600">
+              <p className="text-[10px] text-gray-600 mt-1">
                 신뢰 마크까지 {Math.max(0, 10 - reviews.length)}개 남음
-              </span>
+              </p>
             )}
           </div>
-          <p className="text-xs text-gray-500">{user.email}</p>
-          <div className="flex gap-4 mt-3">
-            <div className="text-center">
-              <div className="text-base font-bold text-white">{reviews.length}</div>
-              <div className="text-[10px] text-gray-500">리뷰</div>
-            </div>
-            <div className="w-px bg-gray-800" />
-            <div className="text-center">
-              <div className="text-base font-bold text-white">{avgMatchScore}%</div>
-              <div className="text-[10px] text-gray-500">평균 반영도</div>
-            </div>
-            <div className="w-px bg-gray-800" />
-            <div className="text-center">
-              <div className="text-base font-bold text-white">{genreData[0]?.[0] ?? "—"}</div>
-              <div className="text-[10px] text-gray-500">최다 감정</div>
-            </div>
+        </div>
+        {/* 통계 */}
+        <div className="grid grid-cols-3 gap-2 pt-4 border-t border-gray-800">
+          <div className="text-center">
+            <div className="text-lg font-bold text-white">{reviews.length}</div>
+            <div className="text-[11px] text-gray-500">리뷰</div>
+          </div>
+          <div className="text-center border-x border-gray-800">
+            <div className="text-lg font-bold text-white">{avgMatchScore}%</div>
+            <div className="text-[11px] text-gray-500">평균 반영도</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-white truncate px-1">{genreData[0]?.[0] ?? "—"}</div>
+            <div className="text-[11px] text-gray-500">최다 감정</div>
           </div>
         </div>
       </div>

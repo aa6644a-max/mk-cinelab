@@ -575,14 +575,14 @@ export default function AdminMembersPage() {
               <button
                 onClick={() => { const p = reviewPage - 1; setReviewPage(p); loadReviews(p); }}
                 disabled={reviewPage <= 1 || reviewsLoading}
-                className="px-3 py-1.5 text-xs border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="px-4 py-2.5 text-xs border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 ← 이전
               </button>
               <button
                 onClick={() => { const p = reviewPage + 1; setReviewPage(p); loadReviews(p); }}
                 disabled={reviewPage >= Math.ceil(reviewTotal / PAGE_SIZE) || reviewsLoading}
-                className="px-3 py-1.5 text-xs border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="px-4 py-2.5 text-xs border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 다음 →
               </button>
