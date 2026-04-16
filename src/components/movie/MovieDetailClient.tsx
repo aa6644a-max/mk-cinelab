@@ -137,7 +137,7 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
               <h2 className="text-sm font-bold text-white mb-3">출연진</h2>
               <div className="space-y-2">
                 {movie.cast.map((actor: any) => (
-                  <Link key={actor.id} href={`/person/${actor.id}`} className="flex items-center gap-2.5 group hover:bg-gray-800/50 rounded-lg p-1 -mx-1 transition-colors">
+                  <Link key={actor.id} href={`/person/${actor.id}`} className="flex items-center gap-2.5 group hover:bg-gray-800/50 rounded-lg p-2 -mx-2 transition-colors">
                     {actor.profile_path ? (
                       <Image src={"https://image.tmdb.org/t/p/w92" + actor.profile_path} alt={actor.name} width={32} height={32} className="rounded-full object-cover flex-shrink-0" />
                     ) : (
@@ -216,17 +216,17 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
                       )}
                       <span className="text-xs font-medium text-gray-300">{profile?.nickname ?? "익명"}</span>
                       {profile?.is_trusted && (
-                        <span className="flex items-center gap-0.5 text-[9px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
+                        <span className="flex items-center gap-0.5 text-[10px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
                           <ShieldCheck className="w-2 h-2" /> 신뢰 마크
                         </span>
                       )}
                       {review.is_ai_assisted && (
-                        <span className="flex items-center gap-0.5 text-[9px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
+                        <span className="flex items-center gap-0.5 text-[10px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
                           <Sparkles className="w-2 h-2" /> AI Assisted
                         </span>
                       )}
                       {review.is_user_edited && (
-                        <span className="flex items-center gap-0.5 text-[9px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
+                        <span className="flex items-center gap-0.5 text-[10px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
                           <PenLine className="w-2 h-2" /> 사용자 검수
                         </span>
                       )}

@@ -168,12 +168,12 @@ function MyReviewCard({
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             <span className="text-xs font-semibold text-red-400">{review.movie_title}</span>
             {review.is_ai_assisted && (
-              <span className="flex items-center gap-0.5 text-[9px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
+              <span className="flex items-center gap-0.5 text-[10px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
                 <Sparkles className="w-2 h-2" /> AI
               </span>
             )}
             {review.is_user_edited && (
-              <span className="flex items-center gap-0.5 text-[9px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
+              <span className="flex items-center gap-0.5 text-[10px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
                 <PenLine className="w-2 h-2" /> 검수
               </span>
             )}

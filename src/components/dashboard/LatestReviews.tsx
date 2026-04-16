@@ -113,12 +113,12 @@ export default function LatestReviews() {
                   </div>
                   <div className="flex-1 p-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <div className="w-4 h-4 rounded-full bg-gray-700 flex items-center justify-center text-[9px] text-gray-400 flex-shrink-0">
+                      <div className="w-4 h-4 rounded-full bg-gray-700 flex items-center justify-center text-[10px] text-gray-400 flex-shrink-0">
                         {nickname[0]}
                       </div>
                       <span className="text-xs text-gray-400">{nickname}</span>
                       {review.is_ai_assisted && (
-                        <span className="flex items-center gap-0.5 text-[9px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
+                        <span className="flex items-center gap-0.5 text-[10px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
                           <Sparkles className="w-2 h-2" /> AI
                         </span>
                       )}

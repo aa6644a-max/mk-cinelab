@@ -133,7 +133,7 @@ export default function ReviewDetailClient({
       {/* 뒤로가기 */}
       <Link
         href="/board"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors mb-6 -ml-1 px-1 py-2"
       >
         <ArrowLeft className="w-4 h-4" /> 리뷰 보드로
       </Link>
@@ -217,17 +217,17 @@ export default function ReviewDetailClient({
                 </span>
               )}
               {profile?.is_trusted && (
-                <span className="flex items-center gap-0.5 text-[9px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-0.5 text-[10px] border border-teal-800 text-teal-400 px-1.5 py-0.5 rounded-full">
                   <ShieldCheck className="w-2 h-2" /> 신뢰 마크
                 </span>
               )}
               {review.is_ai_assisted && (
-                <span className="flex items-center gap-0.5 text-[9px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-0.5 text-[10px] border border-purple-800 text-purple-400 px-1.5 py-0.5 rounded-full">
                   <Sparkles className="w-2 h-2" /> AI Assisted
                 </span>
               )}
               {isUserEdited && (
-                <span className="flex items-center gap-0.5 text-[9px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-0.5 text-[10px] border border-amber-800 text-amber-400 px-1.5 py-0.5 rounded-full">
                   <PenLine className="w-2 h-2" /> 사용자 검수
                 </span>
               )}

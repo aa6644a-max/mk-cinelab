@@ -151,7 +151,7 @@ export default function PersonPage() {
       {/* 뒤로가기 */}
       <button
         onClick={() => window.history.back()}
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors mb-6 -ml-1 px-1 py-2"
       >
         <ArrowLeft className="w-4 h-4" /> 뒤로
       </button>

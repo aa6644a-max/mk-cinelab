@@ -83,7 +83,7 @@ function CardItem({ review }: { review: any }) {
               {profile?.avatar_url ? (
                 <Image src={profile.avatar_url} alt={profile.nickname} width={18} height={18} className="rounded-full flex-shrink-0" />
               ) : (
-                <div className="w-[18px] h-[18px] rounded-full bg-gray-700 flex items-center justify-center text-[9px] text-gray-400 flex-shrink-0">
+                <div className="w-[18px] h-[18px] rounded-full bg-gray-700 flex items-center justify-center text-[10px] text-gray-400 flex-shrink-0">
                   {(profile?.nickname ?? "?")[0]}
                 </div>
               )}
@@ -91,21 +91,21 @@ function CardItem({ review }: { review: any }) {
                 {profile?.nickname ?? review.guest_nickname ?? "익명"}
               </span>
               {profile?.is_trusted && (
-                <span className="flex items-center gap-0.5 text-[9px] border border-teal-700 text-teal-400 bg-teal-950/30 px-1.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-0.5 text-[10px] border border-teal-700 text-teal-400 bg-teal-950/30 px-1.5 py-0.5 rounded-full">
                   <ShieldCheck className="w-2 h-2" /> 신뢰
                 </span>
               )}
               {review.is_ai_assisted && (
-                <span className="flex items-center gap-0.5 text-[9px] border border-purple-700 text-purple-400 bg-purple-950/30 px-1.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-0.5 text-[10px] border border-purple-700 text-purple-400 bg-purple-950/30 px-1.5 py-0.5 rounded-full">
                   <Sparkles className="w-2 h-2" /> AI
                 </span>
               )}
               {review.is_user_edited && (
-                <span className="flex items-center gap-0.5 text-[9px] border border-amber-700 text-amber-400 bg-amber-950/30 px-1.5 py-0.5 rounded-full">
+                <span className="flex items-center gap-0.5 text-[10px] border border-amber-700 text-amber-400 bg-amber-950/30 px-1.5 py-0.5 rounded-full">
                   <PenLine className="w-2 h-2" /> 검수
                 </span>
               )}
-              <span className="flex items-center gap-0.5 text-[9px] text-gray-600 ml-auto flex-shrink-0">
+              <span className="flex items-center gap-0.5 text-[10px] text-gray-600 ml-auto flex-shrink-0">
                 <Clock className="w-2 h-2" />{getTimeAgo(review.created_at)}
               </span>
             </div>
