@@ -102,6 +102,43 @@ export async function getMovieForCuration(title: string, year?: string) {
   }
 }
 
+// TMDB 인물 상세 + 필모그래피
+export async function getPersonDetail(personId: number) {
+  try {
+    const res = await fetch(
+      `${TMDB_BASE}/person/${personId}?api_key=${TMDB_KEY}&language=ko-KR&append_to_response=movie_credits`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+
+    // 출연작 (배우로서)
+    const cast = (data.movie_credits?.cast ?? [])
+      .filter((m: any) => m.poster_path && m.release_date)
+      .sort((a: any, b: any) => b.popularity - a.popularity);
+
+    // 연출작 (감독으로서)
+    const crew = (data.movie_credits?.crew ?? [])
+      .filter((m: any) => m.job === "Director" && m.poster_path && m.release_date)
+      .sort((a: any, b: any) => b.popularity - a.popularity);
+
+    return {
+      id: data.id,
+      name: data.name,
+      profile_path: data.profile_path ?? null,
+      known_for_department: data.known_for_department ?? null,
+      birthday: data.birthday ?? null,
+      place_of_birth: data.place_of_birth ?? null,
+      biography: data.biography ?? null,
+      cast,
+      crew,
+    };
+  } catch (err) {
+    console.error("[TMDB] 인물 조회 실패:", err);
+    return null;
+  }
+}
+
 // TMDB 영화 상세 (상세 페이지용)
 export async function getMovieDetail(tmdbId: number) {
   try {

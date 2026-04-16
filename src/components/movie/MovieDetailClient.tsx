@@ -117,7 +117,12 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
       {movie.director && (
         <p className="text-sm text-gray-400 mb-4">
           <span className="text-gray-600">감독</span>{" "}
-          <span className="text-white font-medium">{movie.director.name}</span>
+          <Link
+            href={`/person/${movie.director.id}`}
+            className="text-white font-medium hover:text-red-400 transition-colors"
+          >
+            {movie.director.name}
+          </Link>
         </p>
       )}
       <OverviewText text={movie.overview} />
@@ -132,17 +137,17 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
               <h2 className="text-sm font-bold text-white mb-3">출연진</h2>
               <div className="space-y-2">
                 {movie.cast.map((actor: any) => (
-                  <div key={actor.id} className="flex items-center gap-2.5">
+                  <Link key={actor.id} href={`/person/${actor.id}`} className="flex items-center gap-2.5 group hover:bg-gray-800/50 rounded-lg p-1 -mx-1 transition-colors">
                     {actor.profile_path ? (
                       <Image src={"https://image.tmdb.org/t/p/w92" + actor.profile_path} alt={actor.name} width={32} height={32} className="rounded-full object-cover flex-shrink-0" />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">{actor.name[0]}</div>
                     )}
                     <div>
-                      <p className="text-xs font-medium text-gray-200">{actor.name}</p>
+                      <p className="text-xs font-medium text-gray-200 group-hover:text-white transition-colors">{actor.name}</p>
                       <p className="text-[10px] text-gray-600">{actor.character}</p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
