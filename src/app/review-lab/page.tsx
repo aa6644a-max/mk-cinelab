@@ -802,8 +802,11 @@ function ReviewLabInner() {
                 onClick={() => {
                   if (isEditing) {
                     if (editedReview.trim()) {
+                      const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
+                      if (normalize(editedReview) !== normalize(review)) {
+                        setIsUserEdited(true);
+                      }
                       setReview(editedReview.trim());
-                      setIsUserEdited(true);
                     }
                     setIsEditing(false);
                   } else {
