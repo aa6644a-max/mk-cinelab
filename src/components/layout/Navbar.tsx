@@ -7,7 +7,9 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
 import SearchBar from "@/components/layout/SearchBar";
-import { Menu, X, LogOut, User, ChevronDown } from "lucide-react";
+import { Menu, X, LogOut, User, ChevronDown, ShieldCheck } from "lucide-react";
+
+const ADMIN_EMAIL = "aa6644a@gmail.com";
 
 const navItems = [
   { label: "대시보드", href: "/" },
@@ -83,6 +85,16 @@ export default function Navbar() {
                   >
                     <User className="w-4 h-4" />마이페이지
                   </Link>
+                  {user.email === ADMIN_EMAIL && (
+                    <>
+                      <div className="h-px bg-gray-800 mx-4" />
+                      <Link href="/admin/members" onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-3 text-sm text-teal-400 hover:bg-gray-800 transition-colors"
+                      >
+                        <ShieldCheck className="w-4 h-4" />회원 관리
+                      </Link>
+                    </>
+                  )}
                   <div className="border-t border-gray-800">
                     <button
                       onClick={() => { setUserMenuOpen(false); signOut(); }}
@@ -139,6 +151,13 @@ export default function Navbar() {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                 </div>
+                {user.email === ADMIN_EMAIL && (
+                  <Link href="/admin/members" onClick={() => setMenuOpen(false)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-teal-400 hover:bg-gray-900 transition-colors"
+                  >
+                    <ShieldCheck className="w-4 h-4" />회원 관리
+                  </Link>
+                )}
                 <button
                   onClick={() => { setMenuOpen(false); signOut(); }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-gray-900 hover:text-red-400 transition-colors"
