@@ -226,6 +226,9 @@ export default function AdminMembersPage() {
   const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewTotal, setReviewTotal] = useState(0);
+  const PAGE_SIZE = 20;
 
   const [detailMember, setDetailMember] = useState<Member | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
@@ -242,17 +245,24 @@ export default function AdminMembersPage() {
       .finally(() => setLoading(false));
   }, [user, initialized, router]);
 
-  const loadReviews = useCallback(() => {
+  const loadReviews = useCallback((page: number) => {
     setReviewsLoading(true);
-    fetch("/api/admin/reviews")
+    fetch(`/api/admin/reviews?page=${page}`)
       .then((r) => r.json())
-      .then((d) => { if (!d.error) setReviews(d.reviews ?? []); })
+      .then((d) => {
+        if (!d.error) {
+          setReviews(d.reviews ?? []);
+          setReviewTotal(d.total ?? 0);
+          setReviewPage(d.page ?? 1);
+        }
+      })
       .finally(() => setReviewsLoading(false));
   }, []);
 
   useEffect(() => {
-    if (tab === "reviews" && reviews.length === 0) loadReviews();
-  }, [tab, reviews.length, loadReviews]);
+    if (tab === "reviews") loadReviews(reviewPage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
 
   // 신뢰 마크 토글
   const handleTrustToggle = async (member: Member) => {
@@ -292,7 +302,7 @@ export default function AdminMembersPage() {
   };
 
   // 리뷰 삭제 (관리자)
-  const handleDeleteReview = async (reviewId: string) => {
+  const handleDeleteReview = async (reviewId: string, ownerId?: string) => {
     const res = await fetch(`/api/review/${reviewId}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -301,11 +311,13 @@ export default function AdminMembersPage() {
     const data = await res.json();
     if (data.success) {
       setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-      // 상세 모달에서 삭제된 경우 목록 갱신
-      if (detailMember) {
+      setReviewTotal((prev) => Math.max(0, prev - 1));
+      // 회원 리뷰 카운트 갱신
+      const targetId = ownerId ?? detailMember?.id;
+      if (targetId) {
         setMembers((prev) =>
           prev.map((m) =>
-            m.id === detailMember.id ? { ...m, review_count: Math.max(0, m.review_count - 1) } : m
+            m.id === targetId ? { ...m, review_count: Math.max(0, m.review_count - 1) } : m
           )
         );
       }
@@ -369,8 +381,8 @@ export default function AdminMembersPage() {
         >
           <Film className="w-3.5 h-3.5 inline mr-1.5" />
           리뷰 관리
-          {reviews.length > 0 && (
-            <span className="ml-1.5 text-xs text-gray-400">{reviews.length}</span>
+          {reviewTotal > 0 && (
+            <span className="ml-1.5 text-xs text-gray-400">{reviewTotal}</span>
           )}
         </button>
       </div>
@@ -501,66 +513,91 @@ export default function AdminMembersPage() {
 
       {/* ── 리뷰 관리 탭 ── */}
       {tab === "reviews" && (
-        <div className="bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden">
-          {reviewsLoading ? (
-            <div className="p-5 space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-16 bg-gray-800 rounded-xl animate-pulse" />
-              ))}
+        <div>
+          {/* 페이지 정보 + 이동 버튼 */}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-gray-500">
+              전체 {reviewTotal}개 · {reviewPage}페이지 / {Math.max(1, Math.ceil(reviewTotal / PAGE_SIZE))}페이지
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { const p = reviewPage - 1; setReviewPage(p); loadReviews(p); }}
+                disabled={reviewPage <= 1 || reviewsLoading}
+                className="px-3 py-1.5 text-xs border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ← 이전
+              </button>
+              <button
+                onClick={() => { const p = reviewPage + 1; setReviewPage(p); loadReviews(p); }}
+                disabled={reviewPage >= Math.ceil(reviewTotal / PAGE_SIZE) || reviewsLoading}
+                className="px-3 py-1.5 text-xs border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                다음 →
+              </button>
             </div>
-          ) : reviews.length === 0 ? (
-            <p className="text-center text-gray-600 text-sm py-12">리뷰가 없습니다</p>
-          ) : (
-            <div className="divide-y divide-gray-800">
-              {reviews.map((review) => (
-                <div key={review.id} className="flex gap-3 px-4 py-3 hover:bg-gray-800/20 transition-colors">
-                  {review.movie_poster ? (
-                    <Image
-                      src={review.movie_poster}
-                      alt={review.movie_title}
-                      width={36}
-                      height={54}
-                      className="rounded-lg object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-9 h-[54px] bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Film className="w-3 h-3 text-gray-600" />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-medium text-white">{review.movie_title}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {review.profiles?.nickname ?? "탈퇴 회원"} ·{" "}
-                          {STYLE_LABELS[review.style] ?? review.style} ·{" "}
-                          {getTimeAgo(review.created_at)} · {review.match_score}%
-                        </p>
+          </div>
+
+          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden">
+            {reviewsLoading ? (
+              <div className="p-5 space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="h-16 bg-gray-800 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : reviews.length === 0 ? (
+              <p className="text-center text-gray-600 text-sm py-12">리뷰가 없습니다</p>
+            ) : (
+              <div className="divide-y divide-gray-800">
+                {reviews.map((review) => (
+                  <div key={review.id} className="flex gap-3 px-4 py-3 hover:bg-gray-800/20 transition-colors">
+                    {review.movie_poster ? (
+                      <Image
+                        src={review.movie_poster}
+                        alt={review.movie_title}
+                        width={36}
+                        height={54}
+                        className="rounded-lg object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-9 h-[54px] bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Film className="w-3 h-3 text-gray-600" />
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <Link
-                          href={`/review/${review.id}`}
-                          className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-                        >
-                          보기
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteReview(review.id)}
-                          className="text-gray-600 hover:text-red-400 transition-colors p-1"
-                          title="리뷰 삭제"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium text-white">{review.movie_title}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {review.profiles?.nickname ?? "탈퇴 회원"} ·{" "}
+                            {STYLE_LABELS[review.style] ?? review.style} ·{" "}
+                            {getTimeAgo(review.created_at)} · {review.match_score}%
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Link
+                            href={`/review/${review.id}`}
+                            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                          >
+                            보기
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteReview(review.id, review.user_id)}
+                            className="text-gray-600 hover:text-red-400 transition-colors p-1"
+                            title="리뷰 삭제"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
+                      <p className="text-xs text-gray-400 mt-1.5 leading-relaxed line-clamp-2">
+                        {review.content}
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1.5 leading-relaxed line-clamp-2">
-                      {review.content}
-                    </p>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
