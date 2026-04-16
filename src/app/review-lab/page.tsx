@@ -323,9 +323,9 @@ function ReviewLabInner() {
           {/* 검색 인풋 */}
           <div>
             <label className="text-sm text-gray-400 mb-2 block">리뷰를 쓸 영화 제목을 입력하세요</label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full min-w-0">
               <div className={cn(
-                "flex items-center gap-2 flex-1 bg-gray-900 border rounded-xl px-4 py-3 transition-colors",
+                "flex items-center gap-2 min-w-0 flex-1 bg-gray-900 border rounded-xl px-4 py-3 transition-colors",
                 "border-gray-700 focus-within:border-red-600"
               )}>
                 <input
@@ -337,7 +337,7 @@ function ReviewLabInner() {
                     if (e.key === "Escape") setShowDropdown(false);
                   }}
                   placeholder="예: 인터스텔라, 기생충..."
-                  className="flex-1 bg-transparent text-white placeholder-gray-600 focus:outline-none text-base"
+                  className="flex-1 min-w-0 bg-transparent text-white placeholder-gray-600 focus:outline-none text-base"
                 />
                 {movieTitle && (
                   <button onClick={() => { setMovieTitle(""); setSearchResults([]); setShowDropdown(false); setSelectedMovie(null); }}>
@@ -349,7 +349,7 @@ function ReviewLabInner() {
                 onClick={handleSearch}
                 disabled={!movieTitle.trim() || isSearching}
                 className={cn(
-                  "flex items-center gap-1.5 px-5 py-3 rounded-xl font-semibold text-sm transition-all flex-shrink-0",
+                  "flex items-center gap-1.5 px-4 py-3 rounded-xl font-semibold text-sm transition-all flex-shrink-0",
                   movieTitle.trim() && !isSearching
                     ? "bg-red-600 hover:bg-red-500 text-white"
                     : "bg-gray-800 text-gray-600 cursor-not-allowed"
@@ -358,7 +358,7 @@ function ReviewLabInner() {
                 {isSearching
                   ? <div className="w-4 h-4 border border-gray-400 border-t-transparent rounded-full animate-spin" />
                   : <Search className="w-4 h-4" />}
-                검색
+                <span className="hidden sm:inline">검색</span>
               </button>
             </div>
           </div>
