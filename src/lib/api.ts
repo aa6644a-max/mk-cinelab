@@ -23,11 +23,11 @@ export async function getBoxOffice() {
 }
 
 // ✅ TMDB 영화 검색 (포스터 매칭용)
-export async function searchMovieTMDB(title: string) {
+export async function searchMovieTMDB(title: string, releaseYear?: string) {
   try {
-    // 1차 시도 — 한국어 + 한국 지역 필터
+    const yearParam = releaseYear ? `&year=${releaseYear}` : "";
     const res = await fetch(
-      `${TMDB_BASE}/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=ko-KR&region=KR&include_adult=false`,
+      `${TMDB_BASE}/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=ko-KR&region=KR&include_adult=false${yearParam}`,
       { next: { revalidate: 3600 } }
     );
 
@@ -42,12 +42,18 @@ export async function searchMovieTMDB(title: string) {
       return null;
     }
 
-    // 한국 영화 우선 정렬
-    // original_language가 ko인 것을 먼저, 그 다음 popularity 순
     const sorted = [...data.results].sort((a: any, b: any) => {
-      const aIsKorean = a.original_language === "ko" ? 1 : 0;
-      const bIsKorean = b.original_language === "ko" ? 1 : 0;
-      if (aIsKorean !== bIsKorean) return bIsKorean - aIsKorean;
+      // 개봉연도가 주어진 경우 연도 일치 우선
+      if (releaseYear) {
+        const aYearMatch = a.release_date?.startsWith(releaseYear) ? 1 : 0;
+        const bYearMatch = b.release_date?.startsWith(releaseYear) ? 1 : 0;
+        if (aYearMatch !== bYearMatch) return bYearMatch - aYearMatch;
+      } else {
+        // 연도 정보 없을 때만 한국 영화 우선
+        const aIsKorean = a.original_language === "ko" ? 1 : 0;
+        const bIsKorean = b.original_language === "ko" ? 1 : 0;
+        if (aIsKorean !== bIsKorean) return bIsKorean - aIsKorean;
+      }
       return b.popularity - a.popularity;
     });
 

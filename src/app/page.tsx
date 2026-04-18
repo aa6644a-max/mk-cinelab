@@ -19,7 +19,8 @@ async function getBoxOfficeWithPosters(): Promise<BoxOfficeMovie[]> {
 
   const movies = await Promise.all(
     raw.slice(0, 10).map(async (item: any) => {
-      const tmdb = await searchMovieTMDB(item.movieNm).catch(() => null);
+      const openYear = item.openDt ? String(item.openDt).slice(0, 4) : undefined;
+      const tmdb = await searchMovieTMDB(item.movieNm, openYear).catch(() => null);
       return {
         rank: Number(item.rnum),
         title: item.movieNm,
