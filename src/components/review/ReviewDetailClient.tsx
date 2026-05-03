@@ -10,6 +10,7 @@ import {
   Film, Calendar, Timer, Tag, Pencil, Trash2, Check, X,
 } from "lucide-react";
 import { ScoreInfoPopover } from "@/components/review/ScoreInfoPopover";
+import ReviewComments from "@/components/review/ReviewComments";
 
 const ADMIN_EMAIL = "aa6644a@gmail.com";
 
@@ -374,6 +375,9 @@ export default function ReviewDetailClient({
           </p>
         </div>
       )}
+
+      {/* 댓글 */}
+      <ReviewComments reviewId={review.id} />
     </div>
   );
 }
