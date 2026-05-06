@@ -30,7 +30,7 @@ export default function MypageClientPage() {
   .order("created_at", { ascending: false }),
       supabase
         .from("profiles")
-        .select("nickname, avatar_url, is_trusted, review_count")
+        .select("nickname, avatar_url, is_trusted, review_count, total_xp, tier")
         .eq("id", user.id)
         .single(),
     ]).then(([reviewsRes, profileRes]) => {

@@ -39,6 +39,68 @@ interface Profile {
   avatar_url: string | null;
   is_trusted: boolean;
   review_count: number;
+  total_xp: number;
+  tier: string;
+}
+
+const TIER_LABELS: Record<string, string> = {
+  rookie: "루키",
+  cinephile: "시네필",
+  curator: "큐레이터",
+  critic: "비평가",
+  maestro: "마에스트로",
+  legend: "레전드",
+};
+
+const TIER_NEXT: Record<string, { label: string; threshold: number } | null> = {
+  rookie:    { label: "시네필",    threshold: 500 },
+  cinephile: { label: "큐레이터",  threshold: 1500 },
+  curator:   { label: "비평가",    threshold: 3000 },
+  critic:    { label: "마에스트로", threshold: 6000 },
+  maestro:   { label: "레전드",    threshold: 10000 },
+  legend:    null,
+};
+
+const TIER_MIN: Record<string, number> = {
+  rookie: 0, cinephile: 500, curator: 1500,
+  critic: 3000, maestro: 6000, legend: 10000,
+};
+
+function XpSection({ xp, tier }: { xp: number; tier: string }) {
+  const next = TIER_NEXT[tier];
+  const min = TIER_MIN[tier] ?? 0;
+  const progress = next
+    ? Math.min(100, Math.round(((xp - min) / (next.threshold - min)) * 100))
+    : 100;
+
+  return (
+    <div className="pt-4 border-t border-gray-800 mt-4 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-gray-500">티어</span>
+        <span className="text-xs font-bold text-white">{TIER_LABELS[tier] ?? tier}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-gray-500">보유 XP</span>
+        <span className="text-xs font-bold text-yellow-400">{xp.toLocaleString()} XP</span>
+      </div>
+      {next && (
+        <>
+          <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-yellow-700 to-yellow-400 rounded-full transition-all duration-700"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-gray-600 text-right">
+            {next.label}까지 {(next.threshold - xp).toLocaleString()} XP 남음
+          </p>
+        </>
+      )}
+      {!next && (
+        <p className="text-[10px] text-amber-400 text-right">최고 티어 달성</p>
+      )}
+    </div>
+  );
 }
 
 const STYLE_LABELS: Record<string, string> = {
@@ -326,6 +388,8 @@ export default function MypageClient({
             <div className="text-[11px] text-gray-500">최다 감정</div>
           </div>
         </div>
+        {/* XP */}
+        <XpSection xp={profile?.total_xp ?? 0} tier={profile?.tier ?? "rookie"} />
       </div>
 
       <div className="flex gap-2 mb-6 flex-wrap">
