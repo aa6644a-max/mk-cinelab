@@ -11,12 +11,15 @@ import { Menu, X, LogOut, User, ChevronDown, ShieldCheck } from "lucide-react";
 
 const ADMIN_EMAIL = "aa6644a@gmail.com";
 
-const navItems = [
+const publicNavItems = [
   { label: "대시보드", href: "/" },
   { label: "AI 취향 큐레이션", href: "/recommend" },
   { label: "AI 비평실", href: "/review-lab" },
   { label: "리뷰 보드", href: "/board" },
   { label: "랭킹", href: "/rankings" },
+];
+
+const authNavItems = [
   { label: "내 리스트", href: "/lists" },
   { label: "마이페이지", href: "/mypage" },
 ];
@@ -46,7 +49,7 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => (
+          {[...publicNavItems, ...(user ? authNavItems : [])].map((item) => (
             <Link key={item.href} href={item.href}
               className={cn("text-sm transition-colors whitespace-nowrap",
                 pathname === item.href ? "text-white font-medium" : "text-gray-400 hover:text-gray-200"
@@ -130,7 +133,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden border-t border-gray-800 bg-black/95">
           <div className="px-4 py-3 space-y-1">
-            {navItems.map((item) => (
+            {[...publicNavItems, ...(user ? authNavItems : [])].map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
                 className={cn("block px-3 py-2.5 rounded-lg text-sm transition-colors",
                   pathname === item.href ? "bg-gray-900 text-white font-medium" : "text-gray-400 hover:bg-gray-900 hover:text-white"
