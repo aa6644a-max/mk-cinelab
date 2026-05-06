@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Clock, Calendar, Film, Sparkles, ShieldCheck, PenLine, ArrowLeft } from "lucide-react";
+import { Star, Clock, Calendar, Film, Sparkles, ShieldCheck, PenLine, ArrowLeft, ListPlus } from "lucide-react";
 import { useState } from "react";
+import AddToListModal from "@/components/lists/AddToListModal";
 
 const STYLE_LABELS: Record<string, string> = {
   critic: "평론가 모드",
@@ -48,6 +49,8 @@ function getTimeAgo(dateStr: string): string {
 }
 
 export default function MovieDetailClient({ movie, reviews }: { movie: any; reviews: any[] }) {
+  const [listModalOpen, setListModalOpen] = useState(false);
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-white transition-colors mb-6">
@@ -183,12 +186,31 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
               리뷰
               {reviews.length > 0 && <span className="text-gray-500 font-normal ml-2">{reviews.length}개</span>}
             </h2>
-            <Link href={`/review-lab?tmdbId=${movie.id}&title=${encodeURIComponent(movie.title)}&poster=${encodeURIComponent(movie.poster_path ?? "")}&year=${movie.release_date?.slice(0, 4) ?? ""}&rating=${movie.vote_average ?? 0}&genres=${encodeURIComponent(movie.genres.map((g: any) => g.id).join(","))}`}>
-              <button className="text-xs text-red-500 border border-red-900 px-3 py-1.5 rounded-lg hover:bg-red-950/30 transition-colors">
-                리뷰 작성하기
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setListModalOpen(true)}
+                className="flex items-center gap-1 text-xs text-gray-400 border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500 hover:text-white transition-colors"
+              >
+                <ListPlus className="w-3.5 h-3.5" />
+                리스트에 추가
               </button>
-            </Link>
+              <Link href={`/review-lab?tmdbId=${movie.id}&title=${encodeURIComponent(movie.title)}&poster=${encodeURIComponent(movie.poster_path ?? "")}&year=${movie.release_date?.slice(0, 4) ?? ""}&rating=${movie.vote_average ?? 0}&genres=${encodeURIComponent(movie.genres.map((g: any) => g.id).join(","))}`}>
+                <button className="text-xs text-red-500 border border-red-900 px-3 py-1.5 rounded-lg hover:bg-red-950/30 transition-colors">
+                  리뷰 작성하기
+                </button>
+              </Link>
+            </div>
           </div>
+
+          <AddToListModal
+            movie={{
+              tmdbId: movie.id,
+              title: movie.title,
+              poster: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
+            }}
+            isOpen={listModalOpen}
+            onClose={() => setListModalOpen(false)}
+          />
           {reviews.length === 0 ? (
             <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl text-gray-600">
               <Film className="w-8 h-8 mx-auto mb-2 opacity-30" />
