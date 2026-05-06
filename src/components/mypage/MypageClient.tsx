@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Film, ShieldCheck, Sparkles, PenLine,
-  BarChart2, Clock, Star, Settings
+  BarChart2, Clock, Star, Settings, List, Lock, Globe, ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { User } from "@supabase/supabase-js";
+
+interface MovieList {
+  id: string;
+  name: string;
+  description: string | null;
+  is_public: boolean;
+  item_count: number;
+  updated_at: string;
+}
 
 interface Review {
   id: string;
@@ -242,8 +251,21 @@ export default function MypageClient({
   profile: Profile | null;
   reviews: Review[];
 }) {
-  const [activeTab, setActiveTab] = useState<"reviews" | "analysis">("reviews");
+  const [activeTab, setActiveTab] = useState<"reviews" | "analysis" | "lists">("reviews");
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const [lists, setLists] = useState<MovieList[]>([]);
+  const [listsLoaded, setListsLoaded] = useState(false);
+  const [listsLoading, setListsLoading] = useState(false);
+
+  useEffect(() => {
+    if (activeTab !== "lists" || listsLoaded) return;
+    setListsLoading(true);
+    fetch(`/api/lists?userId=${user.id}`)
+      .then((r) => r.json())
+      .then((data) => setLists(data.lists ?? []))
+      .catch(() => {})
+      .finally(() => { setListsLoading(false); setListsLoaded(true); });
+  }, [activeTab, listsLoaded, user.id]);
 
   const handleDeleteReview = (id: string) => {
     setReviews((prev) => prev.filter((r) => r.id !== id));
@@ -306,14 +328,15 @@ export default function MypageClient({
         </div>
       </div>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         {[
           { key: "reviews", label: "내 리뷰", icon: Film },
+          { key: "lists", label: "내 리스트", icon: List },
           { key: "analysis", label: "나의 영화 지도", icon: BarChart2 },
         ].map(({ key, label, icon: Icon }) => (
           <button
             key={key}
-            onClick={() => setActiveTab(key as "reviews" | "analysis")}
+            onClick={() => setActiveTab(key as "reviews" | "analysis" | "lists")}
             className={cn(
               "flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all",
               activeTab === key ? "bg-white text-black" : "bg-gray-900 border border-gray-700 text-gray-400 hover:border-gray-500"
@@ -345,6 +368,54 @@ export default function MypageClient({
                 onDelete={handleDeleteReview}
               />
             ))
+          )}
+        </div>
+      )}
+
+      {activeTab === "lists" && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-xs text-gray-500">{lists.length}개의 리스트</p>
+            <Link href="/lists">
+              <button className="text-xs text-red-500 border border-red-900 px-3 py-1.5 rounded-lg hover:bg-red-950/30 transition-colors">
+                전체 관리
+              </button>
+            </Link>
+          </div>
+
+          {listsLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => <div key={i} className="h-16 bg-gray-900 rounded-xl animate-pulse" />)}
+            </div>
+          ) : lists.length === 0 ? (
+            <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl">
+              <List className="w-8 h-8 mx-auto mb-2 text-gray-700" />
+              <p className="text-sm text-gray-500 mb-3">아직 만든 리스트가 없습니다</p>
+              <Link href="/lists">
+                <button className="text-xs text-red-500 border border-red-900 px-4 py-2 rounded-lg hover:bg-red-950/30 transition-colors">
+                  첫 리스트 만들기
+                </button>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {lists.map((list) => (
+                <Link key={list.id} href={`/lists/${list.id}`}>
+                  <div className="flex items-center gap-3 p-4 bg-gray-900/60 border border-gray-800 rounded-xl hover:border-gray-600 transition-all">
+                    <div className="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                      {list.is_public
+                        ? <Globe className="w-4 h-4 text-gray-500" />
+                        : <Lock className="w-4 h-4 text-gray-600" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{list.name}</p>
+                      <p className="text-xs text-gray-500">{list.item_count}편</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0" />
+                  </div>
+                </Link>
+              ))}
+            </div>
           )}
         </div>
       )}
