@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
+import Link from "next/link";
 import { Trophy, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -75,40 +76,42 @@ function RankRow({ entry, isMe }: { entry: RankEntry; isMe: boolean }) {
   const style = isTop3 ? RANK_STYLES[entry.rank - 1] : null;
 
   return (
-    <div className={cn(
-      "flex items-center gap-3 px-4 py-3 rounded-xl border transition-all",
-      isTop3 ? `${style!.bg} ${style!.border}` : "bg-gray-900/40 border-gray-800",
-      isMe && !isTop3 && "border-red-900/60 bg-red-950/20"
-    )}>
-      <div className="w-8 text-center flex-shrink-0">
-        {isTop3 ? (
-          <span className="text-lg">{style!.icon}</span>
-        ) : (
-          <span className="text-sm text-gray-500 font-medium">{entry.rank}</span>
-        )}
-      </div>
-      <Avatar src={entry.avatar_url} name={entry.nickname} size={32} />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className={cn("text-sm font-medium truncate", isTop3 ? "text-white" : "text-gray-300", isMe && "text-red-400")}>
-            {entry.nickname}
-          </span>
-          {isMe && <span className="text-[10px] text-red-500 flex-shrink-0">나</span>}
+    <Link href={`/user/${entry.user_id}`} className="block">
+      <div className={cn(
+        "flex items-center gap-3 px-4 py-3 rounded-xl border transition-all hover:border-gray-600",
+        isTop3 ? `${style!.bg} ${style!.border}` : "bg-gray-900/40 border-gray-800",
+        isMe && !isTop3 && "border-red-900/60 bg-red-950/20"
+      )}>
+        <div className="w-8 text-center flex-shrink-0">
+          {isTop3 ? (
+            <span className="text-lg">{style!.icon}</span>
+          ) : (
+            <span className="text-sm text-gray-500 font-medium">{entry.rank}</span>
+          )}
         </div>
-        <span className={cn(
-          "text-[10px] border px-1.5 py-0.5 rounded-full",
-          TIER_STYLES[entry.tier] ?? TIER_STYLES.rookie
-        )}>
-          {TIER_LABELS[entry.tier] ?? entry.tier}
-        </span>
+        <Avatar src={entry.avatar_url} name={entry.nickname} size={32} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className={cn("text-sm font-medium truncate", isTop3 ? "text-white" : "text-gray-300", isMe && "text-red-400")}>
+              {entry.nickname}
+            </span>
+            {isMe && <span className="text-[10px] text-red-500 flex-shrink-0">나</span>}
+          </div>
+          <span className={cn(
+            "text-[10px] border px-1.5 py-0.5 rounded-full",
+            TIER_STYLES[entry.tier] ?? TIER_STYLES.rookie
+          )}>
+            {TIER_LABELS[entry.tier] ?? entry.tier}
+          </span>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className={cn("text-sm font-bold", isTop3 ? "text-white" : "text-gray-300")}>
+            {entry.xp.toLocaleString()}
+          </p>
+          <p className="text-[10px] text-gray-600">XP</p>
+        </div>
       </div>
-      <div className="text-right flex-shrink-0">
-        <p className={cn("text-sm font-bold", isTop3 ? "text-white" : "text-gray-300")}>
-          {entry.xp.toLocaleString()}
-        </p>
-        <p className="text-[10px] text-gray-600">XP</p>
-      </div>
-    </div>
+    </Link>
   );
 }
 

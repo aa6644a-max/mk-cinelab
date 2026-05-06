@@ -29,6 +29,38 @@ function getTimeAgo(dateStr: string): string {
   return "방금 전";
 }
 
+const TIER_LABELS: Record<string, string> = {
+  rookie: "루키",
+  cinephile: "시네필",
+  curator: "큐레이터",
+  critic: "비평가",
+  maestro: "마에스트로",
+  legend: "레전드",
+};
+
+const TIER_STYLES: Record<string, string> = {
+  rookie: "text-gray-400 border-gray-700",
+  cinephile: "text-blue-400 border-blue-800",
+  curator: "text-purple-400 border-purple-800",
+  critic: "text-red-400 border-red-800",
+  maestro: "text-yellow-400 border-yellow-700",
+  legend: "text-amber-300 border-amber-500",
+};
+
+const TIER_NEXT: Record<string, { label: string; threshold: number } | null> = {
+  rookie:    { label: "시네필",    threshold: 500 },
+  cinephile: { label: "큐레이터",  threshold: 1500 },
+  curator:   { label: "비평가",    threshold: 3000 },
+  critic:    { label: "마에스트로", threshold: 6000 },
+  maestro:   { label: "레전드",    threshold: 10000 },
+  legend:    null,
+};
+
+const TIER_MIN: Record<string, number> = {
+  rookie: 0, cinephile: 500, curator: 1500,
+  critic: 3000, maestro: 6000, legend: 10000,
+};
+
 interface Profile {
   id: string;
   nickname: string;
@@ -36,6 +68,8 @@ interface Profile {
   is_trusted: boolean;
   bio: string | null;
   review_count: number;
+  total_xp: number;
+  tier: string;
 }
 
 interface Review {
@@ -138,14 +172,25 @@ export default function UserProfilePage({
                 <ShieldCheck className="w-2.5 h-2.5" /> 신뢰 마크
               </span>
             )}
+            <span className={cn(
+              "text-[10px] border px-1.5 py-0.5 rounded-full",
+              TIER_STYLES[profile.tier] ?? TIER_STYLES.rookie
+            )}>
+              {TIER_LABELS[profile.tier] ?? profile.tier}
+            </span>
           </div>
           {profile.bio && (
             <p className="text-sm text-gray-400 mb-3">{profile.bio}</p>
           )}
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
             <div className="text-center">
               <div className="text-base font-bold text-white">{reviews.length}</div>
               <div className="text-[10px] text-gray-500">리뷰</div>
+            </div>
+            <div className="w-px bg-gray-800" />
+            <div className="text-center">
+              <div className="text-base font-bold text-yellow-400">{(profile.total_xp ?? 0).toLocaleString()}</div>
+              <div className="text-[10px] text-gray-500">XP</div>
             </div>
             {reviews.length > 0 && (
               <>
@@ -153,13 +198,6 @@ export default function UserProfilePage({
                 <div className="text-center">
                   <div className="text-base font-bold text-white">{avgMatchScore}%</div>
                   <div className="text-[10px] text-gray-500">평균 반영도</div>
-                </div>
-                <div className="w-px bg-gray-800" />
-                <div className="text-center">
-                  <div className="text-base font-bold text-purple-400">
-                    {reviews.filter((r) => r.is_ai_assisted).length}
-                  </div>
-                  <div className="text-[10px] text-gray-500">AI 작성</div>
                 </div>
               </>
             )}

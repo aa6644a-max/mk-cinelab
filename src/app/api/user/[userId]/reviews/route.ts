@@ -16,7 +16,7 @@ export async function GET(
     const [profileRes, reviewsRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, nickname, avatar_url, is_trusted, bio, review_count")
+        .select("id, nickname, avatar_url, is_trusted, bio, review_count, total_xp, tier")
         .eq("id", userId)
         .single(),
       supabase
