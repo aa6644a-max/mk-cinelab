@@ -3,6 +3,7 @@ import { getBoxOffice, searchMovieTMDB } from "@/lib/api";
 import BoxOfficeSection from "@/components/dashboard/BoxOfficeSection";
 import CurationBanner from "@/components/dashboard/CurationBanner";
 import LatestReviews from "@/components/dashboard/LatestReviews";
+import AnnouncementBanner from "@/components/dashboard/AnnouncementBanner";
 import SignoutHandler from "@/components/layout/SignoutHandler";
 import { BoxOfficeMovie } from "@/types";
 
@@ -53,6 +54,7 @@ export default function HomePage() {
       <Suspense fallback={null}>
         <SignoutHandler />
       </Suspense>
+      <AnnouncementBanner />
       <Suspense fallback={<BoxOfficeSkeleton />}>
         <DashboardContent />
       </Suspense>
