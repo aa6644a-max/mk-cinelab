@@ -1,22 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const ADMIN_EMAIL = "aa6644a@gmail.com";
+import { verifyAdmin, getAdminSupabaseClient } from "@/lib/adminAuth";
 
 export async function GET() {
+  const authError = await verifyAdmin();
+  if (authError) return authError;
+
   try {
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceRoleKey) {
-      return NextResponse.json({ error: "서버 설정 오류" }, { status: 500 });
-    }
+    const adminClient = getAdminSupabaseClient();
 
-    const adminClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
-
-    // auth.users 전체 조회
     const { data: usersData, error: usersError } = await adminClient.auth.admin.listUsers({
       perPage: 1000,
     });
@@ -24,7 +15,6 @@ export async function GET() {
       return NextResponse.json({ error: usersError.message }, { status: 500 });
     }
 
-    // profiles 전체 조회
     const { data: profiles, error: profilesError } = await adminClient
       .from("profiles")
       .select("id, nickname, birth_date, gender, review_count, is_trusted, created_at");
@@ -35,7 +25,6 @@ export async function GET() {
     const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
 
     const members = usersData.users
-      .filter((u) => u.email !== ADMIN_EMAIL)
       .map((u) => {
         const profile = profileMap.get(u.id) as any;
         return {

@@ -1,23 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { verifyAdmin, getAdminSupabaseClient } from "@/lib/adminAuth";
 
 const PAGE_SIZE = 20;
 
 export async function GET(req: NextRequest) {
-  try {
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceRoleKey) return NextResponse.json({ error: "서버 설정 오류" }, { status: 500 });
+  const authError = await verifyAdmin();
+  if (authError) return authError;
 
+  try {
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
     const from = (page - 1) * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
 
-    const adminClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
+    const adminClient = getAdminSupabaseClient();
 
     const { data, error, count } = await adminClient
       .from("reviews")

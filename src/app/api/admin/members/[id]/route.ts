@@ -1,27 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-function getAdminClient() {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceRoleKey) throw new Error("서버 설정 오류");
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
-}
+import { verifyAdmin, getAdminSupabaseClient } from "@/lib/adminAuth";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-// 신뢰 마크 토글
 export async function PATCH(req: NextRequest, { params }: Props) {
+  const authError = await verifyAdmin();
+  if (authError) return authError;
+
   try {
     const { id } = await params;
     const { is_trusted } = await req.json();
 
-    const adminClient = getAdminClient();
+    const adminClient = getAdminSupabaseClient();
     const { error } = await adminClient
       .from("profiles")
       .update({ is_trusted })
@@ -35,11 +27,13 @@ export async function PATCH(req: NextRequest, { params }: Props) {
   }
 }
 
-// 회원 강제 탈퇴
 export async function DELETE(_req: NextRequest, { params }: Props) {
+  const authError = await verifyAdmin();
+  if (authError) return authError;
+
   try {
     const { id } = await params;
-    const adminClient = getAdminClient();
+    const adminClient = getAdminSupabaseClient();
 
     await adminClient.from("reviews").delete().eq("user_id", id);
     await adminClient.from("profiles").delete().eq("id", id);

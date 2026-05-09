@@ -1,23 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const ADMIN_EMAIL = "aa6644a@gmail.com";
+import { verifyAdmin, getAdminSupabaseClient } from "@/lib/adminAuth";
 
 export async function PATCH(req: NextRequest) {
+  const authError = await verifyAdmin();
+  if (authError) return authError;
+
   try {
-    const body = await req.json();
-    const { announcement_text, announcement_enabled, adminEmail } = body;
+    const { announcement_text, announcement_enabled } = await req.json();
 
-    if (adminEmail !== ADMIN_EMAIL) {
-      return NextResponse.json({ error: "권한 없음" }, { status: 403 });
-    }
-
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
-
+    const supabase = getAdminSupabaseClient();
     const { error } = await supabase
       .from("site_settings")
       .update({

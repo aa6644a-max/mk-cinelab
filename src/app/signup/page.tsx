@@ -68,7 +68,11 @@ export default function SignupPage() {
         email: email.trim(),
         password,
         options: {
-          data: { name: nickname.trim() },
+          data: {
+            name: nickname.trim(),
+            gender,
+            birth_date: birthDate,
+          },
         },
       });
 
@@ -82,22 +86,16 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .upsert({
-            id: data.user.id,
+        await fetch("/api/auth/create-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: data.user.id,
             nickname: nickname.trim(),
-            avatar_url: null,
-            is_trusted: false,
-            review_count: 0,
             gender,
             birth_date: birthDate,
-          });
-
-        if (profileError) {
-          console.error("프로필 생성 오류:", profileError);
-        }
-
+          }),
+        });
         window.location.href = "/";
       }
     } catch (err) {

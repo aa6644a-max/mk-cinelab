@@ -291,7 +291,6 @@ export default function AdminMembersPage() {
         body: JSON.stringify({
           announcement_text: announcementText || null,
           announcement_enabled: announcementEnabled,
-          adminEmail: user.email,
         }),
       });
       setSettingsSaved(true);
@@ -326,7 +325,9 @@ export default function AdminMembersPage() {
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/admin/members/${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/members/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
       if (data.success) {
         setMembers((prev) => prev.filter((m) => m.id !== deleteTarget.id));
@@ -343,7 +344,7 @@ export default function AdminMembersPage() {
     const res = await fetch(`/api/review/${reviewId}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isAdmin: true }),
+      body: JSON.stringify({}),
     });
     const data = await res.json();
     if (data.success) {
