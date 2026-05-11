@@ -54,15 +54,17 @@ function BiographyText({ text }: { text: string }) {
 }
 
 function MovieCard({ movie, role }: { movie: any; role?: string }) {
+  const [posterError, setPosterError] = useState(false);
   return (
     <Link href={`/movie/tmdb-${movie.id}`} className="group block">
       <div className="relative aspect-[2/3] bg-gray-800 rounded-xl overflow-hidden mb-2">
-        {movie.poster_path ? (
+        {movie.poster_path && !posterError ? (
           <Image
             src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
             alt={movie.title}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={() => setPosterError(true)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

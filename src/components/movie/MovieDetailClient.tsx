@@ -37,6 +37,43 @@ function OverviewText({ text }: { text: string }) {
   );
 }
 
+function CastActorItem({ actor }: { actor: any }) {
+  const [photoError, setPhotoError] = useState(false);
+  return (
+    <Link href={`/person/${actor.id}`} className="flex items-center gap-2.5 group hover:bg-gray-800/50 rounded-lg p-2 -mx-2 transition-colors">
+      {actor.profile_path && !photoError ? (
+        <Image src={"https://image.tmdb.org/t/p/w92" + actor.profile_path} alt={actor.name} width={32} height={32} className="rounded-full object-cover flex-shrink-0" onError={() => setPhotoError(true)} />
+      ) : (
+        <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">{actor.name[0]}</div>
+      )}
+      <div>
+        <p className="text-xs font-medium text-gray-200 group-hover:text-white transition-colors">{actor.name}</p>
+        <p className="text-[10px] text-gray-600">{actor.character}</p>
+      </div>
+    </Link>
+  );
+}
+
+function SimilarMovieItem({ s }: { s: any }) {
+  const [posterError, setPosterError] = useState(false);
+  return (
+    <Link href={"/movie/tmdb-" + s.id} className="flex items-center gap-2.5 hover:bg-gray-900 rounded-lg p-1.5 transition-colors">
+      {s.poster_path && !posterError ? (
+        <Image src={"https://image.tmdb.org/t/p/w92" + s.poster_path} alt={s.title} width={36} height={54} className="rounded object-cover flex-shrink-0" onError={() => setPosterError(true)} />
+      ) : (
+        <div className="w-9 h-[54px] bg-gray-800 rounded flex-shrink-0" />
+      )}
+      <div>
+        <p className="text-xs font-medium text-gray-300">{s.title}</p>
+        <div className="flex items-center gap-1 mt-0.5">
+          <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
+          <span className="text-[10px] text-gray-500">{s.vote_average.toFixed(1)}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function getTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const min = Math.floor(diff / 60000);
@@ -140,17 +177,7 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
               <h2 className="text-sm font-bold text-white mb-3">출연진</h2>
               <div className="space-y-2">
                 {movie.cast.map((actor: any) => (
-                  <Link key={actor.id} href={`/person/${actor.id}`} className="flex items-center gap-2.5 group hover:bg-gray-800/50 rounded-lg p-2 -mx-2 transition-colors">
-                    {actor.profile_path ? (
-                      <Image src={"https://image.tmdb.org/t/p/w92" + actor.profile_path} alt={actor.name} width={32} height={32} className="rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 flex items-center justify-center text-xs text-gray-500">{actor.name[0]}</div>
-                    )}
-                    <div>
-                      <p className="text-xs font-medium text-gray-200 group-hover:text-white transition-colors">{actor.name}</p>
-                      <p className="text-[10px] text-gray-600">{actor.character}</p>
-                    </div>
-                  </Link>
+                  <CastActorItem key={actor.id} actor={actor} />
                 ))}
               </div>
             </div>
@@ -160,20 +187,7 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
               <h2 className="text-sm font-bold text-white mb-3">비슷한 영화</h2>
               <div className="space-y-2">
                 {movie.similar.map((s: any) => (
-                  <Link key={s.id} href={"/movie/tmdb-" + s.id} className="flex items-center gap-2.5 hover:bg-gray-900 rounded-lg p-1.5 transition-colors">
-                    {s.poster_path ? (
-                      <Image src={"https://image.tmdb.org/t/p/w92" + s.poster_path} alt={s.title} width={36} height={54} className="rounded object-cover flex-shrink-0" />
-                    ) : (
-                      <div className="w-9 h-[54px] bg-gray-800 rounded flex-shrink-0" />
-                    )}
-                    <div>
-                      <p className="text-xs font-medium text-gray-300">{s.title}</p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <Star className="w-2.5 h-2.5 text-yellow-500 fill-yellow-500" />
-                        <span className="text-[10px] text-gray-500">{s.vote_average.toFixed(1)}</span>
-                      </div>
-                    </div>
-                  </Link>
+                  <SimilarMovieItem key={s.id} s={s} />
                 ))}
               </div>
             </div>
