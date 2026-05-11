@@ -43,21 +43,23 @@ export async function searchMovieTMDB(title: string, releaseYear?: string) {
     }
 
     const sorted = [...data.results].sort((a: any, b: any) => {
-      // 개봉연도가 주어진 경우 연도 일치 우선
+      // 1순위: 개봉연도 일치
       if (releaseYear) {
         const aYearMatch = a.release_date?.startsWith(releaseYear) ? 1 : 0;
         const bYearMatch = b.release_date?.startsWith(releaseYear) ? 1 : 0;
         if (aYearMatch !== bYearMatch) return bYearMatch - aYearMatch;
-      } else {
-        // 연도 정보 없을 때만 한국 영화 우선
-        const aIsKorean = a.original_language === "ko" ? 1 : 0;
-        const bIsKorean = b.original_language === "ko" ? 1 : 0;
-        if (aIsKorean !== bIsKorean) return bIsKorean - aIsKorean;
       }
+      // 2순위: 한국어 원작 우선 — 연도 유무와 무관하게 항상 적용
+      // (예: "짱구" 검색 시 한국 영화 > 일본 애니 "짱구는 못말려")
+      const aIsKorean = a.original_language === "ko" ? 1 : 0;
+      const bIsKorean = b.original_language === "ko" ? 1 : 0;
+      if (aIsKorean !== bIsKorean) return bIsKorean - aIsKorean;
+      // 3순위: popularity
       return b.popularity - a.popularity;
     });
 
-    return sorted[0] ?? null;
+    // poster_path 있는 결과 우선 반환, 없으면 최상위 결과
+    return sorted.find((m: any) => m.poster_path) ?? sorted[0] ?? null;
 
   } catch (err) {
     console.error(`[TMDB] 검색 실패 — ${title}:`, err);
@@ -76,7 +78,17 @@ export async function getMovieForCuration(title: string, year?: string) {
     if (!searchRes.ok) return null;
 
     const searchData = await searchRes.json();
-    const movie = searchData.results?.[0];
+    const results: any[] = searchData.results ?? [];
+    if (results.length === 0) return null;
+
+    // 한국어 원작 우선, poster_path 있는 결과 우선
+    const sorted = [...results].sort((a, b) => {
+      const aIsKorean = a.original_language === "ko" ? 1 : 0;
+      const bIsKorean = b.original_language === "ko" ? 1 : 0;
+      if (aIsKorean !== bIsKorean) return bIsKorean - aIsKorean;
+      return b.popularity - a.popularity;
+    });
+    const movie = sorted.find((m) => m.poster_path) ?? sorted[0];
     if (!movie) return null;
 
     const detailRes = await fetch(
