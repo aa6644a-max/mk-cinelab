@@ -22,6 +22,7 @@ function mapResult(m: any) {
 async function tmdbSearch(q: string): Promise<any[]> {
   const res = await fetch(
     `${TMDB_BASE}/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(q)}&language=ko-KR&region=KR&page=1`,
+    { next: { revalidate: 300 } },
   );
   if (!res.ok) return [];
   const data = await res.json();
@@ -31,7 +32,7 @@ async function tmdbSearch(q: string): Promise<any[]> {
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("q");
 
-  if (!query || query.trim().length < 2) {
+  if (!query || query.trim().length < 3) {
     return NextResponse.json({ results: [] });
   }
 
@@ -50,7 +51,11 @@ export async function GET(req: NextRequest) {
     }
 
     const results = raw.slice(0, 6).map(mapResult);
-    return NextResponse.json({ results });
+    return NextResponse.json({ results }, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (err) {
     console.error("[search]", err);
     return NextResponse.json({ results: [] });

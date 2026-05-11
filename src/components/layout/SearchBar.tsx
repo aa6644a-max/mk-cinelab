@@ -42,7 +42,7 @@ export default function SearchBar() {
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (query.trim().length < 2) {
+    if (query.trim().length < 3) {
       setResults([]);
       setIsOpen(false);
       return;
@@ -60,7 +60,7 @@ export default function SearchBar() {
       } finally {
         setIsLoading(false);
       }
-    }, 300);
+    }, 500);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -179,7 +179,7 @@ export default function SearchBar() {
       )}
 
       {/* 결과 없음 */}
-      {isOpen && results.length === 0 && !isLoading && query.trim().length >= 2 && (
+      {isOpen && results.length === 0 && !isLoading && query.trim().length >= 3 && (
         <div className="absolute top-full mt-2 right-0 w-[min(256px,calc(100vw-2rem))] bg-gray-900 border border-gray-700 rounded-2xl p-4 text-center shadow-2xl z-40">
           <Film className="w-6 h-6 mx-auto mb-1.5 text-gray-600" />
           <p className="text-xs text-gray-500">검색 결과가 없습니다</p>
