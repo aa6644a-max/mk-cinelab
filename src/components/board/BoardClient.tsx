@@ -7,7 +7,7 @@ import {
   Film, ShieldCheck, Sparkles, PenLine, Clock,
   Search, X, LayoutGrid, List, ChevronLeft, ChevronRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, isValidPosterUrl } from "@/lib/utils";
 
 const STYLE_OPTIONS = [
   { value: "", label: "전체" },
@@ -57,12 +57,14 @@ function getTimeAgo(dateStr: string): string {
 // ─── 카드형 아이템 ────────────────────────────────────────────────
 function CardItem({ review }: { review: any }) {
   const profile = review.profiles;
+  const [posterError, setPosterError] = useState(false);
+  const showPoster = isValidPosterUrl(review.movie_poster) && !posterError;
   return (
     <Link href={`/review/${review.id}`} className="block group">
       <div className="bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-600 transition-all group-hover:bg-gray-900/80">
         <div className="flex">
           <div className="w-[88px] flex-shrink-0 bg-gray-800 self-stretch">
-            {review.movie_poster ? (
+            {showPoster ? (
               <Image
                 src={review.movie_poster}
                 alt={review.movie_title}
@@ -70,6 +72,7 @@ function CardItem({ review }: { review: any }) {
                 height={132}
                 className="w-full h-full object-cover"
                 style={{ minHeight: "120px" }}
+                onError={() => setPosterError(true)}
               />
             ) : (
               <div className="w-full min-h-[120px] flex items-center justify-center">
@@ -133,17 +136,20 @@ function CardItem({ review }: { review: any }) {
 // ─── 리스트형 아이템 ──────────────────────────────────────────────
 function ListItem({ review }: { review: any }) {
   const profile = review.profiles;
+  const [posterError, setPosterError] = useState(false);
+  const showPoster = isValidPosterUrl(review.movie_poster) && !posterError;
   return (
     <Link href={`/review/${review.id}`} className="block group">
       <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-800/60 hover:bg-gray-800/20 transition-colors">
         {/* 포스터 썸네일 */}
-        {review.movie_poster ? (
+        {showPoster ? (
           <Image
             src={review.movie_poster}
             alt={review.movie_title}
             width={32}
             height={48}
             className="rounded-lg object-cover flex-shrink-0"
+            onError={() => setPosterError(true)}
           />
         ) : (
           <div className="w-8 h-12 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">

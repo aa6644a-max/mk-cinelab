@@ -9,6 +9,7 @@ import {
   ArrowLeft, ShieldCheck, Sparkles, PenLine, Clock,
   Film, Calendar, Timer, Tag, Pencil, Trash2, Check, X,
 } from "lucide-react";
+import { isValidPosterUrl } from "@/lib/utils";
 import { ScoreInfoPopover } from "@/components/review/ScoreInfoPopover";
 import ReviewComments from "@/components/review/ReviewComments";
 
@@ -75,6 +76,8 @@ export default function ReviewDetailClient({
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [posterError, setPosterError] = useState(false);
+  const showPoster = isValidPosterUrl(review.movie_poster) && !posterError;
 
   const handleSave = async () => {
     if (!editContent.trim()) return;
@@ -141,13 +144,14 @@ export default function ReviewDetailClient({
 
       {/* 영화 정보 헤더 */}
       <div className="flex gap-4 p-5 bg-gray-900/60 border border-gray-800 rounded-2xl mb-6">
-        {review.movie_poster ? (
+        {showPoster ? (
           <Image
             src={review.movie_poster}
             alt={review.movie_title}
             width={80}
             height={120}
             className="rounded-xl object-cover flex-shrink-0"
+            onError={() => setPosterError(true)}
           />
         ) : (
           <div className="w-20 h-[120px] bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
