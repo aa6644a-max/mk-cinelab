@@ -34,6 +34,55 @@ interface Props {
   listId: string;
 }
 
+function ListMovieCard({ item, isOwner, removingId, onRemove }: {
+  item: ListItem;
+  isOwner: boolean;
+  removingId: number | null;
+  onRemove: (tmdbId: number) => void;
+}) {
+  const [posterError, setPosterError] = useState(false);
+  return (
+    <div className="group relative">
+      <Link href={`/movie/tmdb-${item.tmdb_id}`} className="block">
+        <div className="aspect-[2/3] bg-gray-800 rounded-xl overflow-hidden mb-2 relative">
+          {item.movie_poster && !posterError ? (
+            <Image
+              src={item.movie_poster}
+              alt={item.movie_title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
+              onError={() => setPosterError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Film className="w-8 h-8 text-gray-600" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors rounded-xl" />
+        </div>
+        <p className="text-xs text-gray-300 font-medium line-clamp-2 group-hover:text-white transition-colors">
+          {item.movie_title}
+        </p>
+      </Link>
+      {isOwner && (
+        <button
+          onClick={() => onRemove(item.tmdb_id)}
+          disabled={removingId === item.tmdb_id}
+          className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/70 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+          title="리스트에서 제거"
+        >
+          {removingId === item.tmdb_id ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            <X className="w-3 h-3" />
+          )}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function ListDetailClientPage({ listId }: Props) {
   const { user, initialized } = useAuth();
   const [list, setList] = useState<MovieList | null>(null);
@@ -330,43 +379,7 @@ export default function ListDetailClientPage({ listId }: Props) {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {items.map((item) => (
-            <div key={item.id} className="group relative">
-              <Link href={`/movie/tmdb-${item.tmdb_id}`} className="block">
-                <div className="aspect-[2/3] bg-gray-800 rounded-xl overflow-hidden mb-2 relative">
-                  {item.movie_poster ? (
-                    <Image
-                      src={item.movie_poster}
-                      alt={item.movie_title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Film className="w-8 h-8 text-gray-600" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors rounded-xl" />
-                </div>
-                <p className="text-xs text-gray-300 font-medium line-clamp-2 group-hover:text-white transition-colors">
-                  {item.movie_title}
-                </p>
-              </Link>
-              {isOwner && (
-                <button
-                  onClick={() => removeMovie(item.tmdb_id)}
-                  disabled={removingId === item.tmdb_id}
-                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/70 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
-                  title="리스트에서 제거"
-                >
-                  {removingId === item.tmdb_id ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : (
-                    <X className="w-3 h-3" />
-                  )}
-                </button>
-              )}
-            </div>
+            <ListMovieCard key={item.id} item={item} isOwner={isOwner} removingId={removingId} onRemove={removeMovie} />
           ))}
         </div>
       )}

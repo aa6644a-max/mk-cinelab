@@ -87,6 +87,7 @@ function getTimeAgo(dateStr: string): string {
 
 export default function MovieDetailClient({ movie, reviews }: { movie: any; reviews: any[] }) {
   const [listModalOpen, setListModalOpen] = useState(false);
+  const [mainPosterError, setMainPosterError] = useState(false);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -109,13 +110,14 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
         <div className="relative flex flex-col md:flex-row gap-4 md:gap-6 p-5 md:p-8">
     {/* 포스터 — 모바일에서 중앙 정렬 */}
     <div className="flex-shrink-0 flex justify-center md:block">
-      {movie.poster_path ? (
+      {movie.poster_path && !mainPosterError ? (
         <Image
           src={"https://image.tmdb.org/t/p/w300" + movie.poster_path}
           alt={movie.title}
           width={140}
           height={210}
           className="rounded-xl object-cover shadow-2xl"
+          onError={() => setMainPosterError(true)}
         />
       ) : (
         <div className="w-[140px] h-[210px] bg-gray-800 rounded-xl flex items-center justify-center">
