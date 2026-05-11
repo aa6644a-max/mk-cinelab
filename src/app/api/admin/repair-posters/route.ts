@@ -29,13 +29,15 @@ async function fetchPosterByTmdbId(tmdbId: number): Promise<string | null> {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   const authError = await verifyAdmin();
   if (authError) return authError;
 
+  // force=true 이면 전체 재수선, 기본은 깨진 것만
+  const force = new URL(req.url).searchParams.get("force") === "true";
+
   const supabase = getAdminSupabaseClient();
 
-  // 전체 리뷰 조회 후 JS에서 깨진 것만 필터
   const { data: allReviews, error: fetchError } = await supabase
     .from("reviews")
     .select("id, movie_title, movie_poster, tmdb_id");
@@ -44,9 +46,9 @@ export async function GET() {
     return NextResponse.json({ error: fetchError.message }, { status: 500 });
   }
 
-  const badReviews = (allReviews ?? []).filter(
-    (r) => !isValidPosterUrl(r.movie_poster)
-  );
+  const badReviews = force
+    ? (allReviews ?? [])
+    : (allReviews ?? []).filter((r) => !isValidPosterUrl(r.movie_poster));
 
   const result = {
     total: badReviews.length,
@@ -60,11 +62,11 @@ export async function GET() {
     let newPoster: string | null = null;
     let newTmdbId: number | null = null;
 
-    if (review.tmdb_id) {
-      // tmdb_id 있으면 직접 조회 (정확)
+    if (review.tmdb_id && !force) {
+      // 일반 모드: tmdb_id 있으면 직접 조회 (빠름)
       newPoster = await fetchPosterByTmdbId(review.tmdb_id);
     } else {
-      // tmdb_id 없으면 제목으로 검색
+      // force 모드 또는 tmdb_id 없을 때: 제목으로 재검색 (매칭 로직 재적용)
       const tmdb = await searchMovieTMDB(review.movie_title).catch(() => null);
       if (tmdb?.poster_path) {
         newPoster = `https://image.tmdb.org/t/p/w500${tmdb.poster_path}`;
