@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -219,13 +219,10 @@ function FilterChip({
 // ─── 메인 컴포넌트 ────────────────────────────────────────────────
 export default function BoardClient() {
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
-  const [sort, setSort] = useState("latest");
-  const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [style, setStyle] = useState("");
-  const [badge, setBadge] = useState("");
-  const [scoreMin, setScoreMin] = useState(0);
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState({
+    page: 1, sort: "latest", search: "", style: "", badge: "", scoreMin: 0,
+  });
 
   const [reviews, setReviews] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
@@ -236,18 +233,15 @@ export default function BoardClient() {
   const PAGE_SIZE = 12;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const fetchReviews = useCallback((params: {
-    page: number; sort: string; search: string;
-    style: string; badge: string; scoreMin: number;
-  }) => {
+  useEffect(() => {
     setLoading(true);
     const qs = new URLSearchParams({
-      page: String(params.page),
-      sort: params.sort,
-      search: params.search,
-      style: params.style,
-      badge: params.badge,
-      score_min: String(params.scoreMin),
+      page: String(filters.page),
+      sort: filters.sort,
+      search: filters.search,
+      style: filters.style,
+      badge: filters.badge,
+      score_min: String(filters.scoreMin),
     });
     fetch(`/api/board?${qs}`)
       .then((r) => r.json())
@@ -258,32 +252,21 @@ export default function BoardClient() {
         }
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [filters]);
 
-  // 필터/정렬 변경 시 1페이지로 리셋
-  useEffect(() => {
-    setPage(1);
-    fetchReviews({ page: 1, sort, search, style, badge, scoreMin });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sort, search, style, badge, scoreMin]);
-
-  // 페이지 변경
-  useEffect(() => {
-    fetchReviews({ page, sort, search, style, badge, scoreMin });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
-  // 검색 디바운스
   const handleSearchInput = (val: string) => {
     setSearchInput(val);
     if (searchTimer.current) clearTimeout(searchTimer.current);
-    searchTimer.current = setTimeout(() => setSearch(val), 400);
+    searchTimer.current = setTimeout(
+      () => setFilters((prev) => ({ ...prev, page: 1, search: val })),
+      400
+    );
   };
 
-  const activeFilterCount = [style, badge, scoreMin > 0 ? "score" : ""].filter(Boolean).length;
+  const activeFilterCount = [filters.style, filters.badge, filters.scoreMin > 0 ? "score" : ""].filter(Boolean).length;
 
   const changePage = (p: number) => {
-    setPage(p);
+    setFilters((prev) => ({ ...prev, page: p }));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -316,10 +299,10 @@ export default function BoardClient() {
           {SORT_OPTIONS.map((s) => (
             <button
               key={s.value}
-              onClick={() => setSort(s.value)}
+              onClick={() => setFilters((prev) => ({ ...prev, page: 1, sort: s.value }))}
               className={cn(
                 "text-xs px-3 py-2 rounded-lg border transition-colors whitespace-nowrap",
-                sort === s.value
+                filters.sort === s.value
                   ? "bg-white text-black border-white"
                   : "border-gray-700 text-gray-400 hover:border-gray-500"
               )}
@@ -345,7 +328,7 @@ export default function BoardClient() {
             />
             {searchInput && (
               <button
-                onClick={() => { setSearchInput(""); setSearch(""); }}
+                onClick={() => { setSearchInput(""); setFilters((prev) => ({ ...prev, page: 1, search: "" })); }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300"
               >
                 <X className="w-3.5 h-3.5" />
@@ -377,7 +360,7 @@ export default function BoardClient() {
               <span className="text-xs font-medium text-gray-400">필터</span>
               {activeFilterCount > 0 && (
                 <button
-                  onClick={() => { setStyle(""); setBadge(""); setScoreMin(0); }}
+                  onClick={() => setFilters((prev) => ({ ...prev, page: 1, style: "", badge: "", scoreMin: 0 }))}
                   className="text-[11px] text-gray-500 hover:text-red-400 transition-colors"
                 >
                   초기화
@@ -387,15 +370,27 @@ export default function BoardClient() {
             <div className="space-y-3">
               <div>
                 <p className="text-[11px] text-gray-600 mb-2">스타일</p>
-                <FilterChip options={STYLE_OPTIONS} value={style} onChange={(v) => setStyle(v as string)} />
+                <FilterChip
+                  options={STYLE_OPTIONS}
+                  value={filters.style}
+                  onChange={(v) => setFilters((prev) => ({ ...prev, page: 1, style: v as string }))}
+                />
               </div>
               <div>
                 <p className="text-[11px] text-gray-600 mb-2">배지</p>
-                <FilterChip options={BADGE_OPTIONS} value={badge} onChange={(v) => setBadge(v as string)} />
+                <FilterChip
+                  options={BADGE_OPTIONS}
+                  value={filters.badge}
+                  onChange={(v) => setFilters((prev) => ({ ...prev, page: 1, badge: v as string }))}
+                />
               </div>
               <div>
                 <p className="text-[11px] text-gray-600 mb-2">최소 반영도</p>
-                <FilterChip options={SCORE_OPTIONS} value={scoreMin} onChange={(v) => setScoreMin(v as number)} />
+                <FilterChip
+                  options={SCORE_OPTIONS}
+                  value={filters.scoreMin}
+                  onChange={(v) => setFilters((prev) => ({ ...prev, page: 1, scoreMin: v as number }))}
+                />
               </div>
             </div>
           </div>
@@ -404,22 +399,22 @@ export default function BoardClient() {
         {/* 활성 필터 태그 */}
         {activeFilterCount > 0 && !filtersOpen && (
           <div className="flex items-center gap-2 flex-wrap">
-            {style && (
+            {filters.style && (
               <span className="flex items-center gap-1 text-[11px] bg-red-950/30 border border-red-800 text-red-400 px-2 py-1 rounded-lg">
-                {STYLE_OPTIONS.find((o) => o.value === style)?.label}
-                <button onClick={() => setStyle("")}><X className="w-2.5 h-2.5" /></button>
+                {STYLE_OPTIONS.find((o) => o.value === filters.style)?.label}
+                <button onClick={() => setFilters((prev) => ({ ...prev, page: 1, style: "" }))}><X className="w-2.5 h-2.5" /></button>
               </span>
             )}
-            {badge && (
+            {filters.badge && (
               <span className="flex items-center gap-1 text-[11px] bg-red-950/30 border border-red-800 text-red-400 px-2 py-1 rounded-lg">
-                {BADGE_OPTIONS.find((o) => o.value === badge)?.label}
-                <button onClick={() => setBadge("")}><X className="w-2.5 h-2.5" /></button>
+                {BADGE_OPTIONS.find((o) => o.value === filters.badge)?.label}
+                <button onClick={() => setFilters((prev) => ({ ...prev, page: 1, badge: "" }))}><X className="w-2.5 h-2.5" /></button>
               </span>
             )}
-            {scoreMin > 0 && (
+            {filters.scoreMin > 0 && (
               <span className="flex items-center gap-1 text-[11px] bg-red-950/30 border border-red-800 text-red-400 px-2 py-1 rounded-lg">
-                반영도 {scoreMin}+
-                <button onClick={() => setScoreMin(0)}><X className="w-2.5 h-2.5" /></button>
+                반영도 {filters.scoreMin}+
+                <button onClick={() => setFilters((prev) => ({ ...prev, page: 1, scoreMin: 0 }))}><X className="w-2.5 h-2.5" /></button>
               </span>
             )}
           </div>
@@ -453,9 +448,12 @@ export default function BoardClient() {
         <div className="text-center py-20 text-gray-600">
           <Film className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p className="text-sm">조건에 맞는 리뷰가 없습니다</p>
-          {(search || activeFilterCount > 0) && (
+          {(filters.search || activeFilterCount > 0) && (
             <button
-              onClick={() => { setSearchInput(""); setSearch(""); setStyle(""); setBadge(""); setScoreMin(0); }}
+              onClick={() => {
+                setSearchInput("");
+                setFilters({ page: 1, sort: filters.sort, search: "", style: "", badge: "", scoreMin: 0 });
+              }}
               className="text-xs text-gray-500 hover:text-red-400 mt-2 transition-colors"
             >
               필터 초기화
@@ -476,8 +474,8 @@ export default function BoardClient() {
       {!loading && totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-8">
           <button
-            onClick={() => changePage(page - 1)}
-            disabled={page <= 1}
+            onClick={() => changePage(filters.page - 1)}
+            disabled={filters.page <= 1}
             className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -485,7 +483,7 @@ export default function BoardClient() {
 
           <div className="flex gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - filters.page) <= 2)
               .reduce<(number | "...")[]>((acc, p, idx, arr) => {
                 if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push("...");
                 acc.push(p);
@@ -502,7 +500,7 @@ export default function BoardClient() {
                     onClick={() => changePage(p as number)}
                     className={cn(
                       "w-10 h-10 rounded-lg text-sm font-medium transition-colors",
-                      page === p
+                      filters.page === p
                         ? "bg-red-600 text-white"
                         : "border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white"
                     )}
@@ -514,8 +512,8 @@ export default function BoardClient() {
           </div>
 
           <button
-            onClick={() => changePage(page + 1)}
-            disabled={page >= totalPages}
+            onClick={() => changePage(filters.page + 1)}
+            disabled={filters.page >= totalPages}
             className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />
