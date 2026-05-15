@@ -9,6 +9,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "MK CINELAB — 신뢰할 수 있는 영화 플랫폼",
   description: "실시간 박스오피스, AI 취향 큐레이션, 전문가 리뷰",
+  verification: {
+    google: "B84FKZcjuWnXZU5o5zFk5jKPky96mtjByITxDsq8DMI",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
