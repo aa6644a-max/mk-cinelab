@@ -65,17 +65,28 @@ export async function GET(req: NextRequest) {
     }
 
     // 신뢰마크 필터는 profiles 조인 결과로 후처리
-    let reviews = data ?? [];
+    let reviews = (data ?? []).map((r: any) => ({
+      ...r,
+      // 목록에서는 300자 미리보기만 전송 — 전문은 상세 페이지에서 로드
+      content: r.content ? r.content.slice(0, 300) : "",
+    }));
     if (badge === "trusted") {
       reviews = reviews.filter((r: any) => r.profiles?.is_trusted === true);
     }
 
-    return NextResponse.json({
-      reviews,
-      total: badge === "trusted" ? reviews.length : (count ?? 0),
-      page,
-      pageSize: PAGE_SIZE,
-    });
+    return NextResponse.json(
+      {
+        reviews,
+        total: badge === "trusted" ? reviews.length : (count ?? 0),
+        page,
+        pageSize: PAGE_SIZE,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+        },
+      }
+    );
   } catch (err) {
     console.error("[board/route]", err);
     return NextResponse.json({ error: "서버 오류" }, { status: 500 });

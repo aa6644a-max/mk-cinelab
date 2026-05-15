@@ -130,15 +130,30 @@ export async function getPersonDetail(personId: number) {
     if (!res.ok) return null;
     const data = await res.json();
 
-    // 출연작 (배우로서)
+    // 출연작 (배우로서) — 상위 24편만, 필요 필드만
     const cast = (data.movie_credits?.cast ?? [])
       .filter((m: any) => m.poster_path && m.release_date)
-      .sort((a: any, b: any) => b.popularity - a.popularity);
+      .sort((a: any, b: any) => b.popularity - a.popularity)
+      .slice(0, 24)
+      .map((m: any) => ({
+        id: m.id,
+        title: m.title,
+        poster_path: m.poster_path,
+        release_date: m.release_date,
+        character: m.character,
+      }));
 
-    // 연출작 (감독으로서)
+    // 연출작 (감독으로서) — 상위 12편만, 필요 필드만
     const crew = (data.movie_credits?.crew ?? [])
       .filter((m: any) => m.job === "Director" && m.poster_path && m.release_date)
-      .sort((a: any, b: any) => b.popularity - a.popularity);
+      .sort((a: any, b: any) => b.popularity - a.popularity)
+      .slice(0, 12)
+      .map((m: any) => ({
+        id: m.id,
+        title: m.title,
+        poster_path: m.poster_path,
+        release_date: m.release_date,
+      }));
 
     return {
       id: data.id,
@@ -147,7 +162,7 @@ export async function getPersonDetail(personId: number) {
       known_for_department: data.known_for_department ?? null,
       birthday: data.birthday ?? null,
       place_of_birth: data.place_of_birth ?? null,
-      biography: data.biography ?? null,
+      biography: data.biography ? data.biography.slice(0, 1000) : null,
       cast,
       crew,
     };

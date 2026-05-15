@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase-server";
 
-export const dynamic = "force-dynamic";
-
 function getWeekStart() {
   const now = new Date();
   const day = now.getDay(); // 0=일, 1=월 ...
@@ -70,16 +68,20 @@ export async function GET(req: NextRequest) {
         }
       }
 
-      return NextResponse.json({ rankings, myRank });
+      return NextResponse.json({ rankings, myRank }, {
+        headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
+      });
     }
 
     // weekly / monthly
     const startDate = period === "monthly" ? getMonthStart() : getWeekStart();
 
+    // 집계에 필요한 최소 필드만, 최대 5000건으로 제한 (대역폭 제어)
     const { data: events } = await supabase
       .from("xp_events")
       .select("user_id, xp")
-      .gte("created_at", startDate.toISOString());
+      .gte("created_at", startDate.toISOString())
+      .limit(5000);
 
     const xpMap: Record<string, number> = {};
     for (const e of events ?? []) {
@@ -134,7 +136,9 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ rankings, myRank });
+    return NextResponse.json({ rankings, myRank }, {
+      headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
+    });
   } catch (err) {
     console.error("[rankings]", err);
     return NextResponse.json({ error: "서버 오류" }, { status: 500 });

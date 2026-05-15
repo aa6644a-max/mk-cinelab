@@ -108,7 +108,12 @@ export default function LatestReviews() {
       .order("created_at", { ascending: false })
       .range(from, to);
 
-    setReviews(data ?? []);
+    setReviews(
+      (data ?? []).map((r: any) => ({
+        ...r,
+        content: r.content ? r.content.slice(0, 300) : "",
+      }))
+    );
     setTotalCount(count ?? 0);
     if (!silent) setIsLoading(false);
   };

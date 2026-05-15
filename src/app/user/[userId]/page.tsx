@@ -93,11 +93,14 @@ export default function UserProfilePage({
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/user/${userId}/reviews`)
+    fetch(`/api/user/${userId}/reviews?page=1`)
       .then((res) => {
         if (res.status === 404) { setNotFound(true); return null; }
         return res.json();
@@ -106,10 +109,25 @@ export default function UserProfilePage({
         if (!data) return;
         setProfile(data.profile);
         setReviews(data.reviews);
+        setTotal(data.total ?? 0);
+        setPage(1);
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [userId]);
+
+  const loadMore = () => {
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    fetch(`/api/user/${userId}/reviews?page=${nextPage}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setReviews((prev) => [...prev, ...(data.reviews ?? [])]);
+        setPage(nextPage);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingMore(false));
+  };
 
   if (loading) {
     return (
@@ -184,7 +202,7 @@ export default function UserProfilePage({
           )}
           <div className="flex gap-4 flex-wrap">
             <div className="text-center">
-              <div className="text-base font-bold text-white">{reviews.length}</div>
+              <div className="text-base font-bold text-white">{profile.review_count ?? total}</div>
               <div className="text-[10px] text-gray-500">리뷰</div>
             </div>
             <div className="w-px bg-gray-800" />
@@ -209,7 +227,7 @@ export default function UserProfilePage({
       <div className="flex items-center gap-2 mb-4">
         <Film className="w-4 h-4 text-red-500" />
         <h2 className="text-sm font-bold text-white">작성한 리뷰</h2>
-        <span className="text-xs text-gray-600 ml-1">{reviews.length}편</span>
+        <span className="text-xs text-gray-600 ml-1">{total}편</span>
       </div>
 
       {reviews.length === 0 ? (
@@ -267,6 +285,15 @@ export default function UserProfilePage({
               </div>
             </Link>
           ))}
+          {reviews.length < total && (
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="w-full py-3 text-sm text-gray-400 hover:text-white border border-gray-800 hover:border-gray-600 rounded-xl transition-colors disabled:opacity-50"
+            >
+              {loadingMore ? "불러오는 중..." : `더 보기 (${total - reviews.length}편 남음)`}
+            </button>
+          )}
         </div>
       )}
     </div>

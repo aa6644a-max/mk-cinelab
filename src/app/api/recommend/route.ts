@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
           title: movie.title,
           reason: movie.reason,
           poster: tmdb?.poster_path
-            ? `https://image.tmdb.org/t/p/w780${tmdb.poster_path}`
+            ? `https://image.tmdb.org/t/p/w342${tmdb.poster_path}`
             : null,
           id: tmdb?.id ?? null,
           releaseYear: tmdb?.releaseDate?.split("-")[0] ?? movie.year ?? "미상",

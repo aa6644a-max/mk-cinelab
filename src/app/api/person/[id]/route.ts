@@ -18,7 +18,11 @@ export async function GET(_req: NextRequest, { params }: Props) {
       return NextResponse.json({ error: "인물 정보를 찾을 수 없습니다" }, { status: 404 });
     }
 
-    return NextResponse.json(person);
+    return NextResponse.json(person, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    });
   } catch (err) {
     console.error("[person/route]", err);
     return NextResponse.json({ error: "서버 오류" }, { status: 500 });

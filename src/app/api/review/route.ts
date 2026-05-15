@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     // 2. TMDB 포스터
     const tmdb = await searchMovieTMDB(movieTitle).catch(() => null);
     const poster = tmdb?.poster_path
-      ? `https://image.tmdb.org/t/p/w780${tmdb.poster_path}`
+      ? `https://image.tmdb.org/t/p/w342${tmdb.poster_path}`
       : null;
 
     return NextResponse.json({ review, matchScore, poster });
