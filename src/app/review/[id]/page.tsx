@@ -3,6 +3,8 @@ import { getMovieDetail } from "@/lib/api";
 import { notFound } from "next/navigation";
 import ReviewDetailClient from "@/components/review/ReviewDetailClient";
 
+export const revalidate = 300;
+
 interface Props {
   params: Promise<{ id: string }>;
 }

@@ -8,7 +8,7 @@ export default function AnnouncementBanner() {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    fetch("/api/site-settings", { cache: "no-store" })
+    fetch("/api/site-settings")
       .then((r) => r.json())
       .then((data) => {
         if (data.announcement_enabled && data.announcement_text) {

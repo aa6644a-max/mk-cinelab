@@ -25,16 +25,22 @@ export default function MypageClientPage() {
     Promise.all([
       supabase
         .from("reviews")
-  .select("id, user_id, movie_title, movie_poster, content, style, input_keywords, match_score, is_ai_assisted, is_user_edited, created_at")
-  .eq("user_id", user.id)
-  .order("created_at", { ascending: false }),
+        .select("id, user_id, movie_title, movie_poster, content, style, input_keywords, match_score, is_ai_assisted, is_user_edited, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(200),
       supabase
         .from("profiles")
         .select("nickname, avatar_url, is_trusted, review_count, total_xp, tier")
         .eq("id", user.id)
         .single(),
     ]).then(([reviewsRes, profileRes]) => {
-      setReviews(reviewsRes.data ?? []);
+      setReviews(
+        (reviewsRes.data ?? []).map((r: any) => ({
+          ...r,
+          content: r.content ? r.content.slice(0, 300) : "",
+        }))
+      );
       setProfile(profileRes.data);
     }).catch((err) => {
       console.error("마이페이지 데이터 로딩 오류:", err);
