@@ -1,22 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Megaphone, X } from "lucide-react";
 
-export default function AnnouncementBanner() {
-  const [text, setText] = useState<string | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+interface Props {
+  text: string;
+}
 
-  useEffect(() => {
-    fetch("/api/site-settings")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.announcement_enabled && data.announcement_text) {
-          setText(data.announcement_text);
-        }
-      })
-      .catch(() => {});
-  }, []);
+export default function AnnouncementBanner({ text }: Props) {
+  const [dismissed, setDismissed] = useState(false);
 
   if (!text || dismissed) return null;
 

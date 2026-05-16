@@ -17,7 +17,6 @@ export async function GET() {
     .single();
 
   return NextResponse.json(
-    data ?? { announcement_text: null, announcement_enabled: false },
-    { headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" } }
+    data ?? { announcement_text: null, announcement_enabled: false }
   );
 }
