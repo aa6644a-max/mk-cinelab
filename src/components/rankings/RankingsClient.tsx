@@ -125,7 +125,7 @@ export default function RankingsClient() {
   useEffect(() => {
     setLoading(true);
     const userId = user?.id ?? "";
-    fetch(`/api/rankings?period=${period}${userId ? `&userId=${userId}` : ""}`, { cache: "no-store" })
+    fetch(`/api/rankings?period=${period}${userId ? `&userId=${userId}` : ""}`)
       .then((r) => r.json())
       .then((data) => {
         setRankings(data.rankings ?? []);

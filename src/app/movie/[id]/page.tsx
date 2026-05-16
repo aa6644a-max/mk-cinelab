@@ -3,7 +3,7 @@ import { getMovieDetail } from "@/lib/api";
 import { createServerSupabase } from "@/lib/supabase-server";
 import MovieDetailClient from "@/components/movie/MovieDetailClient";
 
-export const revalidate = 60;
+export const revalidate = 3600;
 
 interface Props {
   params: Promise<{ id: string }>;
