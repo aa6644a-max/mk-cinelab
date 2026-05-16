@@ -16,7 +16,6 @@ const publicNavItems = [
   { label: "AI 취향 큐레이션", href: "/recommend" },
   { label: "AI 비평실", href: "/review-lab" },
   { label: "리뷰 보드", href: "/board" },
-  { label: "랭킹", href: "/rankings" },
 ];
 
 const authNavItems = [

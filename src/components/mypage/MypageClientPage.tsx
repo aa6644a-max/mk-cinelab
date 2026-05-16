@@ -31,7 +31,7 @@ export default function MypageClientPage() {
         .limit(200),
       supabase
         .from("profiles")
-        .select("nickname, avatar_url, is_trusted, review_count, total_xp, tier")
+        .select("nickname, avatar_url, is_trusted, review_count")
         .eq("id", user.id)
         .single(),
     ]).then(([reviewsRes, profileRes]) => {

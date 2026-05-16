@@ -1,33 +1,12 @@
 import { Suspense } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { getBoxOffice, searchMovieTMDB } from "@/lib/api";
 import BoxOfficeSection from "@/components/dashboard/BoxOfficeSection";
 import CurationBanner from "@/components/dashboard/CurationBanner";
 import LatestReviews from "@/components/dashboard/LatestReviews";
-import AnnouncementBanner from "@/components/dashboard/AnnouncementBanner";
 import SignoutHandler from "@/components/layout/SignoutHandler";
 import { BoxOfficeMovie } from "@/types";
 
 export const revalidate = 3600;
-
-async function getAnnouncement(): Promise<string | null> {
-  try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
-    const { data } = await supabase
-      .from("site_settings")
-      .select("announcement_text, announcement_enabled")
-      .eq("id", 1)
-      .single();
-    if (data?.announcement_enabled && data?.announcement_text) {
-      return data.announcement_text as string;
-    }
-  } catch {}
-  return null;
-}
 
 async function getBoxOfficeWithPosters(): Promise<BoxOfficeMovie[]> {
   let raw;
@@ -69,14 +48,11 @@ async function DashboardContent() {
 }
 
 export default async function HomePage() {
-  const announcement = await getAnnouncement();
-
   return (
     <div className="space-y-12">
       <Suspense fallback={null}>
         <SignoutHandler />
       </Suspense>
-      {announcement && <AnnouncementBanner text={announcement} />}
       <Suspense fallback={<BoxOfficeSkeleton />}>
         <DashboardContent />
       </Suspense>

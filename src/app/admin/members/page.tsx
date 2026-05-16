@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Users, ShieldCheck, Film, ArrowLeft, Trash2,
-  ChevronRight, X, Check, AlertTriangle, Megaphone, Save, Loader2,
+  ChevronRight, X, Check, AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -220,7 +220,7 @@ export default function AdminMembersPage() {
   const router = useRouter();
   const { user, initialized } = useAuth();
 
-  const [tab, setTab] = useState<"members" | "reviews" | "settings">("members");
+  const [tab, setTab] = useState<"members" | "reviews">("members");
   const [members, setMembers] = useState<Member[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -229,12 +229,6 @@ export default function AdminMembersPage() {
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewTotal, setReviewTotal] = useState(0);
   const PAGE_SIZE = 20;
-
-  const [announcementText, setAnnouncementText] = useState("");
-  const [announcementEnabled, setAnnouncementEnabled] = useState(false);
-  const [settingsLoading, setSettingsLoading] = useState(false);
-  const [settingsSaving, setSettingsSaving] = useState(false);
-  const [settingsSaved, setSettingsSaved] = useState(false);
 
   const [detailMember, setDetailMember] = useState<Member | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
@@ -267,38 +261,8 @@ export default function AdminMembersPage() {
 
   useEffect(() => {
     if (tab === "reviews") loadReviews(reviewPage);
-    if (tab === "settings") {
-      setSettingsLoading(true);
-      fetch("/api/site-settings", { cache: "no-store" })
-        .then((r) => r.json())
-        .then((d) => {
-          setAnnouncementText(d.announcement_text ?? "");
-          setAnnouncementEnabled(d.announcement_enabled ?? false);
-        })
-        .finally(() => setSettingsLoading(false));
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
-
-  const handleSaveSettings = async () => {
-    if (!user) return;
-    setSettingsSaving(true);
-    setSettingsSaved(false);
-    try {
-      await fetch("/api/admin/site-settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          announcement_text: announcementText || null,
-          announcement_enabled: announcementEnabled,
-        }),
-      });
-      setSettingsSaved(true);
-      setTimeout(() => setSettingsSaved(false), 3000);
-    } finally {
-      setSettingsSaving(false);
-    }
-  };
 
   // 신뢰 마크 토글
   const handleTrustToggle = async (member: Member) => {
@@ -422,15 +386,6 @@ export default function AdminMembersPage() {
           {reviewTotal > 0 && (
             <span className="ml-1.5 text-xs text-gray-400">{reviewTotal}</span>
           )}
-        </button>
-        <button
-          onClick={() => setTab("settings")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            tab === "settings" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300"
-          }`}
-        >
-          <Megaphone className="w-3.5 h-3.5 inline mr-1.5" />
-          사이트 설정
         </button>
       </div>
 
@@ -696,80 +651,6 @@ export default function AdminMembersPage() {
                 ))}
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* ── 사이트 설정 탭 ── */}
-      {tab === "settings" && (
-        <div className="max-w-xl">
-          <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-5 space-y-5">
-            <div>
-              <h2 className="text-sm font-bold text-white mb-1">메인 공지 배너</h2>
-              <p className="text-xs text-gray-500 mb-4">
-                활성화하면 메인 화면 상단에 노란색 배너로 표시됩니다
-              </p>
-
-              {settingsLoading ? (
-                <div className="space-y-3">
-                  <div className="h-8 bg-gray-800 rounded-lg animate-pulse" />
-                  <div className="h-28 bg-gray-800 rounded-lg animate-pulse" />
-                </div>
-              ) : (
-                <>
-                  {/* 활성화 토글 */}
-                  <div className="flex items-center justify-between p-3 bg-gray-800/60 rounded-xl mb-3">
-                    <span className="text-sm text-gray-300">공지 표시</span>
-                    <button
-                      onClick={() => setAnnouncementEnabled((v) => !v)}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${
-                        announcementEnabled ? "bg-yellow-600" : "bg-gray-700"
-                      }`}
-                    >
-                      <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                        announcementEnabled ? "left-5" : "left-0.5"
-                      }`} />
-                    </button>
-                  </div>
-
-                  {/* 공지 텍스트 */}
-                  <textarea
-                    value={announcementText}
-                    onChange={(e) => setAnnouncementText(e.target.value)}
-                    placeholder="공지 내용을 입력하세요..."
-                    rows={4}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 resize-none focus:outline-none focus:border-yellow-700 transition-colors"
-                  />
-
-                  {/* 미리보기 */}
-                  {announcementEnabled && announcementText && (
-                    <div className="mt-3 p-3 bg-yellow-950/40 border border-yellow-800/50 rounded-xl flex items-start gap-2">
-                      <Megaphone className="w-3.5 h-3.5 text-yellow-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-yellow-200 whitespace-pre-wrap">{announcementText}</p>
-                    </div>
-                  )}
-
-                  {/* 저장 버튼 */}
-                  <div className="flex items-center gap-3 mt-4">
-                    <button
-                      onClick={handleSaveSettings}
-                      disabled={settingsSaving}
-                      className="flex items-center gap-2 px-4 py-2 bg-yellow-700 hover:bg-yellow-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      {settingsSaving
-                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        : <Save className="w-3.5 h-3.5" />}
-                      저장
-                    </button>
-                    {settingsSaved && (
-                      <span className="text-xs text-green-400 flex items-center gap-1">
-                        <Check className="w-3 h-3" /> 저장됐습니다
-                      </span>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
           </div>
         </div>
       )}
