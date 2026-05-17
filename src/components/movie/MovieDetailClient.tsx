@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Star, Clock, Calendar, Film, Sparkles, ShieldCheck, PenLine, ArrowLeft, ListPlus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddToListModal from "@/components/lists/AddToListModal";
 
 const STYLE_LABELS: Record<string, string> = {
@@ -85,9 +85,19 @@ function getTimeAgo(dateStr: string): string {
   return "방금 전";
 }
 
-export default function MovieDetailClient({ movie, reviews }: { movie: any; reviews: any[] }) {
+export default function MovieDetailClient({ movie }: { movie: any }) {
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const [listModalOpen, setListModalOpen] = useState(false);
   const [mainPosterError, setMainPosterError] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/movie-reviews?title=${encodeURIComponent(movie.title)}`)
+      .then((r) => r.json())
+      .then((d) => setReviews(d.reviews ?? []))
+      .catch(() => {})
+      .finally(() => setReviewsLoading(false));
+  }, [movie.title]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -227,7 +237,13 @@ export default function MovieDetailClient({ movie, reviews }: { movie: any; revi
             isOpen={listModalOpen}
             onClose={() => setListModalOpen(false)}
           />
-          {reviews.length === 0 ? (
+          {reviewsLoading ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-28 bg-gray-900 rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : reviews.length === 0 ? (
             <div className="text-center py-16 border border-dashed border-gray-800 rounded-2xl text-gray-600">
               <Film className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm">아직 작성된 리뷰가 없습니다</p>

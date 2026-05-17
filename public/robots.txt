@@ -1,7 +1,41 @@
-User-agent: *
+# AI 학습 봇 — /movie, /person 크롤링 차단
+User-agent: GPTBot
+Disallow: /movie/
+Disallow: /person/
+Disallow: /api/
+
+User-agent: oai-searchbot
+Disallow: /movie/
+Disallow: /person/
+Disallow: /api/
+
+User-agent: PerplexityBot
+Disallow: /movie/
+Disallow: /person/
+Disallow: /api/
+
+User-agent: anthropic-ai
+Disallow: /movie/
+Disallow: /person/
+Disallow: /api/
+
+User-agent: ClaudeBot
+Disallow: /movie/
+Disallow: /person/
+Disallow: /api/
+
+User-agent: Googlebot
+Crawl-delay: 2
+
+User-agent: Bingbot
+Crawl-delay: 5
 Disallow: /api/
 Disallow: /admin/
 Disallow: /auth/
 
+# 기본 규칙
 User-agent: *
+Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
 Allow: /
