@@ -3,8 +3,13 @@ import { getPersonDetail } from "@/lib/api";
 import PersonPageClient from "@/components/person/PersonPageClient";
 import { User } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 interface Props {
   params: Promise<{ id: string }>;

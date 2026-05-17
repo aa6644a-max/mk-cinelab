@@ -55,7 +55,7 @@ function BiographyText({ text }: { text: string }) {
 function MovieCard({ movie, role }: { movie: any; role?: string }) {
   const [posterError, setPosterError] = useState(false);
   return (
-    <Link href={`/movie/tmdb-${movie.id}`} className="group block">
+    <Link href={`/movie/tmdb-${movie.id}`} rel="nofollow" className="group block">
       <div className="relative aspect-[2/3] bg-gray-800 rounded-xl overflow-hidden mb-2">
         {movie.poster_path && !posterError ? (
           <Image

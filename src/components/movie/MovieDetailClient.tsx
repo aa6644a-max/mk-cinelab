@@ -40,7 +40,7 @@ function OverviewText({ text }: { text: string }) {
 function CastActorItem({ actor }: { actor: any }) {
   const [photoError, setPhotoError] = useState(false);
   return (
-    <Link href={`/person/${actor.id}`} className="flex items-center gap-2.5 group hover:bg-gray-800/50 rounded-lg p-2 -mx-2 transition-colors">
+    <Link href={`/person/${actor.id}`} rel="nofollow" className="flex items-center gap-2.5 group hover:bg-gray-800/50 rounded-lg p-2 -mx-2 transition-colors">
       {actor.profile_path && !photoError ? (
         <Image src={"https://image.tmdb.org/t/p/w92" + actor.profile_path} alt={actor.name} width={32} height={32} className="rounded-full object-cover flex-shrink-0" onError={() => setPhotoError(true)} />
       ) : (
@@ -57,7 +57,7 @@ function CastActorItem({ actor }: { actor: any }) {
 function SimilarMovieItem({ s }: { s: any }) {
   const [posterError, setPosterError] = useState(false);
   return (
-    <Link href={"/movie/tmdb-" + s.id} className="flex items-center gap-2.5 hover:bg-gray-900 rounded-lg p-1.5 transition-colors">
+    <Link href={"/movie/tmdb-" + s.id} rel="nofollow" className="flex items-center gap-2.5 hover:bg-gray-900 rounded-lg p-1.5 transition-colors">
       {s.poster_path && !posterError ? (
         <Image src={"https://image.tmdb.org/t/p/w92" + s.poster_path} alt={s.title} width={36} height={54} className="rounded object-cover flex-shrink-0" onError={() => setPosterError(true)} />
       ) : (
@@ -171,6 +171,7 @@ export default function MovieDetailClient({ movie }: { movie: any }) {
           <span className="text-gray-600">감독</span>{" "}
           <Link
             href={`/person/${movie.director.id}`}
+            rel="nofollow"
             className="text-white font-medium hover:text-red-400 transition-colors"
           >
             {movie.director.name}
