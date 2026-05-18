@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mk-cinelab.vercel.app"),
   title: "MK CINELAB — 신뢰할 수 있는 영화 플랫폼",
   description: "실시간 박스오피스, AI 취향 큐레이션, 전문가 리뷰",
   verification: {
