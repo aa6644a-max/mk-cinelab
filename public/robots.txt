@@ -1,35 +1,49 @@
-# AI 학습 봇 — /movie, /person 크롤링 차단
+# AI 학습 봇 전체 차단
 User-agent: GPTBot
-Disallow: /movie/
-Disallow: /person/
-Disallow: /api/
+Disallow: /
 
 User-agent: oai-searchbot
-Disallow: /movie/
-Disallow: /person/
-Disallow: /api/
+Disallow: /
 
 User-agent: PerplexityBot
-Disallow: /movie/
-Disallow: /person/
-Disallow: /api/
+Disallow: /
 
 User-agent: anthropic-ai
-Disallow: /movie/
-Disallow: /person/
-Disallow: /api/
+Disallow: /
 
 User-agent: ClaudeBot
-Disallow: /movie/
+Disallow: /
+
+User-agent: AmazonBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+# Google — /person/ 크롤 낭비 방지 (noindex 페이지)
+User-agent: Googlebot
+Crawl-delay: 5
 Disallow: /person/
 Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
 
-User-agent: Googlebot
-Crawl-delay: 2
-Disallow: /person/
-
+# Bing
 User-agent: Bingbot
-Crawl-delay: 5
+Crawl-delay: 10
+Disallow: /person/
 Disallow: /api/
 Disallow: /admin/
 Disallow: /auth/
